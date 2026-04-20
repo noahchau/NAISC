@@ -1,0 +1,2709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project Memento — Cognitive Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --cream: #faf7f2;
+    --warm: #f0ebe0;
+    --sage: #7a9e87;
+    --sage-dark: #4a7a5c;
+    --terracotta: #c4714f;
+    --navy: #1e2d40;
+    --navy-light: #2e4057;
+    --gold: #d4a853;
+    --text: #2a2015;
+    --muted: #7a7060;
+    --card: #ffffff;
+    --border: #e0d9cc;
+    --success: #5a9e6f;
+    --danger: #c44f3e;
+    --warning: #d4a853;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display:none; min-height:100vh; }
+  .screen.active { display:flex; flex-direction:column; }
+
+  /* ===== WELCOME ===== */
+  #welcome {
+    background: var(--navy);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  #welcome::before {
+    content:'';
+    position:absolute; top:-200px; right:-200px;
+    width:600px; height:600px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(122,158,135,0.15) 0%, transparent 70%);
+  }
+  #welcome::after {
+    content:'';
+    position:absolute; bottom:-150px; left:-150px;
+    width:400px; height:400px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(196,113,79,0.1) 0%, transparent 70%);
+  }
+  .welcome-inner { text-align:center; max-width:560px; position:relative; z-index:1; }
+  .brain-icon {
+    width:80px; height:80px;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    border-radius:24px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px;
+    margin: 0 auto 32px;
+    box-shadow: 0 20px 60px rgba(122,158,135,0.3);
+  }
+  .welcome-inner h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .welcome-inner h1 em { color: var(--sage); font-style:normal; }
+  .welcome-inner p {
+    color: rgba(250,247,242,0.65);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+  .welcome-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+    justify-content: center;
+  }
+  .wcard {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .wcard-icon { font-size: 14px; }
+  .wcard h3 { color: var(--cream); font-size: 0.8rem; font-weight: 600; }
+  .wcard p { display: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    color: white;
+    border: none;
+    padding: 20px 64px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 8px 30px rgba(74,122,92,0.35);
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(74,122,92,0.45); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--sage);
+    border: 2px solid var(--sage);
+    padding: 13px 32px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover { background: var(--sage); color: white; }
+
+  /* ===== SETUP ===== */
+  #setup {
+    background: var(--cream);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .setup-card {
+    background: white;
+    border-radius: 28px;
+    padding: 48px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+  }
+  .setup-card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+  .setup-card > p { color: var(--muted); margin-bottom: 32px; font-size: 0.95rem; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--sage);
+  }
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+  .upload-area:hover { border-color: var(--sage); background: rgba(122,158,135,0.05); }
+  .upload-area.has-file { border-color: var(--sage); background: rgba(122,158,135,0.08); }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-area p { color: var(--muted); font-size: 0.9rem; }
+  .upload-area .filename { color: var(--sage-dark); font-weight: 600; }
+  .setup-actions { display: flex; gap: 12px; margin-top: 28px; }
+  .setup-actions .btn-primary { flex: 1; text-align: center; }
+
+  /* ===== GAME HUB ===== */
+  #hub {
+    background: var(--cream);
+    padding: 0;
+  }
+  .hub-header {
+    background: var(--navy);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hub-header h2 {
+    font-family: 'DM Serif Display', serif;
+    color: var(--cream);
+    font-size: 1.4rem;
+  }
+  .patient-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 8px 18px;
+    color: var(--cream);
+    font-size: 0.85rem;
+  }
+  .hub-content { padding: 40px; flex: 1; }
+  .hub-intro { margin-bottom: 36px; }
+  .hub-intro h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .hub-intro p { color: var(--muted); }
+  .progress-bar-wrap { background: var(--border); border-radius: 100px; height: 6px; margin-top: 16px; }
+  .progress-bar-fill { height: 6px; border-radius: 100px; background: linear-gradient(90deg, var(--sage), var(--sage-dark)); transition: width 0.4s; }
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .game-card {
+    background: white;
+    border-radius: 24px;
+    padding: 32px 28px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card:hover { border-color: var(--sage); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+  .game-card.completed { border-color: var(--success); }
+  .game-card.completed::after {
+    content: '✓';
+    position: absolute;
+    top: 16px; right: 20px;
+    background: var(--success);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .game-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .game-card-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+  .game-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; color: var(--navy); }
+  .game-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+  .game-card .duration { font-size: 0.78rem; color: var(--sage-dark); font-weight: 600; margin-top: 12px; }
+  .hub-actions { margin-top: 36px; display: flex; gap: 14px; }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen {
+    background: var(--cream);
+    padding: 0;
+  }
+  .game-header {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.2s;
+    padding: 4px;
+  }
+  .back-btn:hover { color: var(--navy); }
+  .game-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    flex: 1;
+  }
+  .timer-badge {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .game-body { padding: 40px; flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .game-instructions {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 28px;
+    margin-bottom: 32px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+  .game-instructions p { color: var(--navy); font-size: 0.95rem; line-height: 1.6; }
+  .game-area { max-width: 660px; width: 100%; }
+
+  /* Memory Card Game */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .mem-card {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    transition: all 0.3s;
+    background: white;
+    position: relative;
+    perspective: 600px;
+  }
+  .mem-card .front, .mem-card .back {
+    position: absolute; width:100%; height:100%;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    backface-visibility: hidden;
+    transition: transform 0.4s;
+  }
+  .mem-card .front { background: linear-gradient(135deg, var(--navy), var(--navy-light)); color: var(--cream); font-size:1.2rem; }
+  .mem-card .back { background: white; transform: rotateY(180deg); font-size: 2rem; }
+  .mem-card.flipped .front { transform: rotateY(180deg); }
+  .mem-card.flipped .back { transform: rotateY(0deg); }
+  .mem-card.matched { border-color: var(--success); }
+  .mem-card.matched .back { background: rgba(90,158,111,0.1); }
+
+  /* Word Recall */
+  .word-display {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 24px;
+    min-height: 160px;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .word-display .phase-label { color: rgba(250,247,242,0.5); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+  .word-display .word-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .word-chip {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 8px 20px;
+    color: var(--cream);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .word-input-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .word-input {
+    padding: 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+    background: white;
+    transition: border-color 0.2s;
+  }
+  .word-input:focus { outline: none; border-color: var(--sage); }
+  .word-input.correct { border-color: var(--success); background: rgba(90,158,111,0.08); }
+  .word-input.wrong { border-color: var(--danger); background: rgba(196,68,62,0.08); }
+
+  /* Pattern Recognition */
+  .pattern-grid {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .pattern-cell {
+    border-radius: 12px;
+    aspect-ratio: 1;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  .pattern-cell.active { background: var(--sage) !important; }
+  .pattern-cell.inactive { background: var(--warm); }
+  .pattern-cell.selected { border-color: var(--terracotta); transform: scale(0.95); }
+  .pattern-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .pattern-option {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pattern-option:hover { border-color: var(--sage); }
+  .pattern-option.selected-ans { border-color: var(--terracotta); }
+  .pattern-option.correct-ans { border-color: var(--success); background: rgba(90,158,111,0.08); }
+  .pattern-option.wrong-ans { border-color: var(--danger); background: rgba(196,68,62,0.08); }
+  .mini-grid { display: grid; gap: 4px; }
+  .mini-cell { border-radius: 4px; aspect-ratio: 1; }
+
+  /* Number Memory */
+  .number-display {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 50px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .number-sequence {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: var(--cream);
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .number-hint { color: rgba(250,247,242,0.5); font-size: 0.85rem; }
+  .number-input-big {
+    width: 100%;
+    padding: 20px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 0.15em;
+    background: white;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .number-input-big:focus { outline: none; border-color: var(--sage); }
+
+  /* Game result */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cream);
+    border: 2px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 22px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--navy);
+    margin-bottom: 24px;
+  }
+  .btn-game {
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 12px;
+  }
+  .btn-game:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(74,122,92,0.3); }
+  .btn-game.secondary {
+    background: transparent;
+    color: var(--sage-dark);
+    border: 2px solid var(--sage);
+  }
+
+  /* ===== RESULTS ===== */
+  #results {
+    background: var(--cream);
+    padding: 0;
+  }
+  .results-header {
+    background: var(--navy);
+    padding: 40px;
+    text-align: center;
+  }
+  .results-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+  .results-header p { color: rgba(250,247,242,0.6); }
+  .results-content { padding: 40px; max-width: 720px; margin: 0 auto; width: 100%; }
+  .results-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+  }
+  .summary-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+  .summary-card .value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--navy); }
+  .summary-card .sub { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  .game-results { margin-bottom: 32px; }
+  .game-results h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .result-row {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-row .rname { font-weight: 600; color: var(--navy); }
+  .result-row .rscore { font-size: 1.1rem; font-weight: 700; }
+  .result-row .rtime { color: var(--muted); font-size: 0.85rem; }
+  .score-high { color: var(--success); }
+  .score-mid { color: var(--warning); }
+  .score-low { color: var(--danger); }
+  .dataset-compare {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  .dataset-compare h3 { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--navy); margin-bottom: 16px; }
+  .compare-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .compare-label { font-size: 0.85rem; color: var(--muted); width: 120px; flex-shrink: 0; }
+  .compare-bar-wrap { flex: 1; background: var(--warm); border-radius: 100px; height: 8px; }
+  .compare-bar { height: 8px; border-radius: 100px; }
+  .compare-val { font-size: 0.85rem; font-weight: 600; color: var(--navy); width: 40px; text-align: right; }
+  .saved-indicator {
+    background: rgba(90,158,111,0.1);
+    border: 1px solid rgba(90,158,111,0.3);
+    border-radius: 14px;
+    padding: 14px 20px;
+    color: var(--sage-dark);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .results-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ===== DATA VIEWER ===== */
+  #data-screen {
+    background: var(--cream);
+    padding: 0;
+  }
+  .data-header {
+    background: var(--navy);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .data-header h2 { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.4rem; flex:1; }
+  .data-content { padding: 32px 40px; overflow: auto; }
+  .data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .data-stat {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .data-stat .dl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; }
+  .data-stat .dv { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; }
+  th { background: var(--navy); color: var(--cream); padding: 12px 16px; text-align: left; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  td { padding: 11px 16px; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--cream); }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-dem { background: rgba(196,68,62,0.12); color: var(--danger); }
+  .badge-non { background: rgba(90,158,111,0.12); color: var(--success); }
+  .badge-con { background: rgba(212,168,83,0.15); color: var(--gold); }
+
+  /* Utility */
+  .flex-center { display:flex; align-items:center; justify-content:center; }
+  .mt-16 { margin-top:16px; }
+  .text-center { text-align:center; }
+  .hidden { display:none !important; }
+  @media (max-width: 600px) {
+    .hub-header, .hub-content, .game-header, .game-body, .results-header, .results-content, .data-header, .data-content { padding: 20px; }
+    .memory-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .word-input-grid { grid-template-columns: repeat(2, 1fr); }
+    .welcome-cards { grid-template-columns: 1fr; }
+    .setup-card { padding: 28px; }
+  }
+
+  /* ===== LANGUAGE SWITCHER ===== */
+  .lang-switcher {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .lang-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 14px 28px;
+    color: rgba(250,247,242,0.85);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 96px;
+  }
+  .lang-btn:hover { background: rgba(255,255,255,0.14); color: var(--cream); }
+  .lang-btn.active { background: var(--sage); border-color: var(--sage); color: white; }
+
+  /* ===== REACTION GAME ===== */
+  .reaction-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    width: 100%;
+  }
+  .reaction-btn {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 3rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .reaction-btn:active { transform: scale(0.93); }
+  .reaction-btn.waiting { background: var(--warm); color: var(--muted); cursor: not-allowed; }
+  .reaction-btn.ready   { background: linear-gradient(135deg, var(--sage), var(--sage-dark)); color: white; animation: pulse 0.6s ease-in-out; }
+  .reaction-btn.too-soon { background: linear-gradient(135deg, var(--terracotta), #a0522d); color: white; }
+  @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.06)} 100%{transform:scale(1)} }
+  .reaction-results-grid { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px; }
+  .reaction-chip {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 18px; text-align:center;
+  }
+  .reaction-chip .rc-val { font-family:'DM Serif Display',serif; font-size:1.4rem; color:var(--navy); }
+  .reaction-chip .rc-lbl { font-size:0.75rem; color:var(--muted); }
+
+  /* ===== CAREGIVER DASHBOARD ===== */
+  #dashboard {
+    background: var(--cream);
+    padding: 0;
+  }
+  .dash-header {
+    background: var(--navy);
+    padding: 28px 40px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .dash-header h2 { font-family:'DM Serif Display',serif; color:var(--cream); font-size:1.4rem; flex:1; }
+  .dash-content { padding: 32px 40px; max-width: 800px; margin: 0 auto; width:100%; }
+  .dash-pin-wrap {
+    background: white; border: 1px solid var(--border); border-radius: 20px;
+    padding: 40px; text-align: center; margin-bottom: 24px;
+  }
+  .dash-pin-wrap h3 { font-family:'DM Serif Display',serif; font-size:1.4rem; color:var(--navy); margin-bottom:8px; }
+  .dash-pin-wrap p  { color:var(--muted); font-size:0.9rem; margin-bottom:24px; }
+  .pin-input {
+    width: 160px; padding: 16px; text-align:center;
+    font-size: 1.8rem; letter-spacing: 0.3em;
+    border: 2px solid var(--border); border-radius: 14px;
+    font-family: 'DM Serif Display', serif;
+    margin-bottom: 16px; display: block; margin-left:auto; margin-right:auto;
+  }
+  .pin-input:focus { outline:none; border-color:var(--sage); }
+  .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:28px; }
+  .dash-stat { background:white; border:1px solid var(--border); border-radius:16px; padding:20px; text-align:center; }
+  .dash-stat .ds-val { font-family:'DM Serif Display',serif; font-size:1.8rem; color:var(--navy); }
+  .dash-stat .ds-lbl { font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+  .session-card {
+    background: white; border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px 24px; margin-bottom: 12px;
+  }
+  .session-card .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .session-card .sc-name { font-weight:700; color:var(--navy); font-size:1rem; }
+  .session-card .sc-date { font-size:0.8rem; color:var(--muted); }
+  .session-card .sc-scores { display:flex; gap:8px; flex-wrap:wrap; }
+  .sc-tag {
+    font-size:0.78rem; font-weight:600; padding:4px 10px;
+    border-radius:100px; background:var(--warm); color:var(--navy);
+  }
+  .trend-up   { color: var(--success); }
+  .trend-down { color: var(--danger); }
+  .trend-same { color: var(--muted); }
+  .empty-dash { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-dash .ed-icon { font-size:3rem; margin-bottom:16px; }
+  @media(max-width:600px){
+    .dash-header, .dash-content { padding:20px; }
+  }
+
+  /* ===== LOCK BUTTON ===== */
+  .lock-btn {
+    position: absolute;
+    top: 24px; left: 24px;
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .lock-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.05); }
+  #welcome { position: relative; }
+
+  /* ===== CHATBOT ===== */
+  .chat-fab {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    border: none; cursor: pointer;
+    font-size: 1.6rem;
+    box-shadow: 0 6px 28px rgba(74,122,92,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .chat-fab:hover { transform: scale(1.08); box-shadow: 0 10px 36px rgba(74,122,92,0.5); }
+  .chat-panel {
+    position: fixed;
+    bottom: 104px; right: 28px;
+    width: min(380px, calc(100vw - 40px));
+    max-height: 520px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.18);
+    display: flex; flex-direction: column;
+    z-index: 998;
+    overflow: hidden;
+    transform: scale(0.92) translateY(16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .chat-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .chat-header {
+    background: var(--navy);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .chat-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .chat-header-text h4 { color: var(--cream); font-size: 0.95rem; font-weight: 600; }
+  .chat-header-text p  { color: rgba(250,247,242,0.5); font-size: 0.75rem; }
+  .chat-close {
+    margin-left: auto; background: none; border: none;
+    color: rgba(250,247,242,0.6); font-size: 1.3rem; cursor: pointer;
+    padding: 4px; border-radius: 6px; transition: color 0.2s;
+  }
+  .chat-close:hover { color: var(--cream); }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    'ex-title': 'Aktiviti Lembut',
+    'ex-sub': 'Aktiviti lembut untuk membantu anda berehat dan berasa lebih baik.',
+    'ex-breathing': 'Senaman Pernafasan',
+    'ex-breathing-desc': 'Sesi pernafasan kotak 4-4-4 yang menenangkan untuk mengurangkan tekanan.',
+    'ex-coming-soon': 'Akan datang',
+    'breath-ready': 'Bersedia',
+    'breath-press': 'Tekan mula apabila bersedia',
+    'breath-in': 'Tarik nafas…',
+    'breath-hold': 'Tahan…',
+    'breath-out': 'Hembus nafas…',
+    'breath-round': 'Pusingan',
+    'breath-of': 'daripada',
+    'breath-done-label': 'Syabas!',
+    'breath-done-sub': 'Anda telah melengkapkan sesi pernafasan 🌿',
+    begin: 'Mula →',croll-behavior: smooth;
+  }
+  .chat-msg {
+    max-width: 85%; padding: 11px 15px;
+    border-radius: 18px; font-size: 0.9rem; line-height: 1.5;
+    animation: msgIn 0.2s ease;
+  }
+  @keyframes msgIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .chat-msg.bot {
+    background: var(--warm); color: var(--text);
+    border-bottom-left-radius: 4px; align-self: flex-start;
+  }
+  .chat-msg.user {
+    background: var(--sage); color: white;
+    border-bottom-right-radius: 4px; align-self: flex-end;
+  }
+  .chat-typing {
+    background: var(--warm); color: var(--muted);
+    padding: 11px 16px; border-radius: 18px; border-bottom-left-radius: 4px;
+    font-size: 1.2rem; align-self: flex-start; letter-spacing: 2px;
+    animation: msgIn 0.2s ease;
+  }
+  .chat-quick-replies {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 0 16px 10px;
+  }
+  .qr-btn {
+    background: var(--warm); border: 1px solid var(--border);
+    border-radius: 100px; padding: 7px 14px;
+    font-size: 0.82rem; cursor: pointer; color: var(--navy);
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .qr-btn:hover { background: var(--sage); color: white; border-color: var(--sage); }
+  .chat-input-row {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .chat-input {
+    flex: 1; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 100px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: var(--sage); }
+  .chat-send {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--sage); border: none; cursor: pointer;
+    color: white; font-size: 1rem; display: flex;
+    align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .chat-send:hover { background: var(--sage-dark); }
+
+  /* ===== LARGE TEXT MODE ===== */
+  body.large-text { font-size: 1.18rem; }
+  body.large-text .wcard h3, body.large-text .game-card h3 { font-size: 1.05rem; }
+  body.large-text .btn-primary { font-size: 1.25rem; padding: 22px 64px; }
+  body.large-text .btn-secondary { font-size: 1.1rem; padding: 16px 36px; }
+  body.large-text .lang-btn { font-size: 1.2rem; padding: 16px 28px; }
+  body.large-text p, body.large-text label { font-size: 1.1rem; }
+  body.large-text input, body.large-text select { font-size: 1.1rem; padding: 16px 18px; }
+  body.large-text .game-card p { font-size: 1rem; }
+  body.large-text .welcome-inner h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); }
+
+  /* ===== LARGE TEXT TOGGLE BTN ===== */
+  .text-size-btn {
+    position: absolute; top: 24px; right: 24px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px; padding: 8px 16px;
+    color: rgba(250,247,242,0.8); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; z-index: 10;
+  }
+  .text-size-btn:hover { background: rgba(255,255,255,0.22); }
+  .text-size-btn.active { background: var(--sage); border-color: var(--sage); color: white; }
+
+  /* ===== PATIENT HOME (tabs) ===== */
+  #patient-home { background: var(--cream); padding: 0; }
+  .patient-home-header {
+    background: var(--navy); padding: 24px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .patient-home-header .ph-left { display: flex; align-items: center; gap: 14px; }
+  .patient-home-header h2 { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.3rem; }
+  .patient-home-header p { color: rgba(250,247,242,0.55); font-size: 0.82rem; margin-top: 2px; }
+  .patient-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .tab-bar {
+    display: flex; background: white;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1; padding: 16px; border: none; background: none;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--sage); }
+  .tab-content { display: none; padding: 28px 32px; flex: 1; flex-direction: column; }
+  .tab-content.active { display: flex; flex-direction: column; }
+
+  /* Assessment tab */
+  .last-assessment-banner {
+    background: white; border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .last-assessment-banner .lab-left p { color: var(--muted); font-size: 0.82rem; }
+  .last-assessment-banner .lab-left h4 { color: var(--navy); font-size: 1rem; font-weight: 700; margin-top: 2px; }
+  .last-score-pill {
+    padding: 8px 18px; border-radius: 100px;
+    font-weight: 700; font-size: 1rem;
+  }
+
+  /* Exercises tab */
+  .exercise-card {
+    background: white; border: 1px solid var(--border); border-radius: 20px;
+    padding: 24px; margin-bottom: 14px; cursor: pointer;
+    display: flex; align-items: center; gap: 18px;
+    transition: all 0.2s;
+  }
+  .exercise-card:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .exercise-card-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; flex-shrink: 0;
+  }
+  .exercise-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .exercise-card p  { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+  .exercise-card .ex-dur { font-size: 0.78rem; color: var(--sage-dark); font-weight: 600; margin-top: 6px; }
+
+  /* ===== BREATHING SCREEN ===== */
+  #breathing-screen { background: var(--navy); align-items: center; justify-content: center; }
+  .breathing-inner { text-align: center; max-width: 400px; padding: 40px 20px; }
+  .breathing-inner h2 { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.8rem; margin-bottom: 8px; }
+  .breathing-inner .b-sub { color: rgba(250,247,242,0.5); font-size: 0.9rem; margin-bottom: 48px; }
+  .breath-circle-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 32px; }
+  .breath-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(122,158,135,0.15);
+    border: 2px solid rgba(122,158,135,0.3);
+    transition: none;
+  }
+  .breath-ring.expanding { transform: scale(1.5); background: rgba(122,158,135,0.25); transition: transform 4s cubic-bezier(0.4,0,0.2,1), background 1s; }
+  .breath-ring.hold-in   { transform: scale(1.5); background: rgba(122,158,135,0.3);  transition: none; }
+  .breath-ring.shrinking { transform: scale(1);   background: rgba(122,158,135,0.1);  transition: transform 4s cubic-bezier(0.4,0,0.2,1), background 1s; }
+  .breath-dot {
+    position: absolute; inset: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 2rem;
+    transition: none;
+  }
+  .breath-dot.expanding { transform: scale(1.3); transition: transform 4s cubic-bezier(0.4,0,0.2,1); }
+  .breath-dot.hold-in   { transform: scale(1.3); transition: none; }
+  .breath-dot.shrinking { transform: scale(1);   transition: transform 4s cubic-bezier(0.4,0,0.2,1); }
+  .breath-dot.hold-out  { transform: scale(1);   transition: none; }
+  .breath-label { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.6rem; margin-bottom: 8px; min-height: 2rem; }
+  .breath-timer { color: rgba(250,247,242,0.5); font-size: 0.95rem; margin-bottom: 32px; }
+  .breath-rounds { color: rgba(250,247,242,0.45); font-size: 0.82rem; margin-bottom: 28px; }
+
+  @media(max-width:600px){
+    .tab-content { padding: 20px; }
+    .patient-home-header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== WELCOME ===== -->
+<section class="screen active" id="welcome">
+  <button class="lock-btn" onclick="openDashboard()" title="Caregiver Access">🔒</button>
+  <button class="text-size-btn" id="text-size-btn" onclick="toggleLargeText()"><span style="font-size:0.8rem;opacity:0.7;">A</span> <span style="font-size:1.2rem;">A</span></button>
+  <div class="welcome-inner">
+    <div class="brain-icon">🧠</div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">🇬🇧 EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
+      <button class="lang-btn" onclick="setLang('ms')">🇲🇾 BM</button>
+    </div>
+    <div style="display:inline-block;background:rgba(122,158,135,0.18);border:1px solid rgba(122,158,135,0.35);border-radius:100px;padding:5px 16px;margin-bottom:18px;">
+      <span id="t-tag" style="color:var(--sage);font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;">Cognitive Screening Tool</span>
+    </div>
+    <h1><em>Project</em> Memento</h1>
+    <p style="color:rgba(250,247,242,0.45);font-size:0.92rem;font-style:italic;margin-top:-8px;margin-bottom:10px;"><span id="t-motto">Remembering who you are, one moment at a time.</span></p>
+    <p><span id="t-desc">A gentle, game-based assessment designed to detect early signs of cognitive change in seniors — through play, not pressure.</span></p>
+    <div style="margin-bottom:10px;">
+      <div id="t-home-games-label" style="color:rgba(250,247,242,0.45);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px;">🧠 Assessment Games</div>
+      <div class="welcome-cards" style="margin-bottom:10px;">
+        <div class="wcard"><div class="wcard-icon">🃏</div><h3><span data-t="game-memory">Memory Matching</span></h3></div>
+        <div class="wcard"><div class="wcard-icon">🔷</div><h3><span data-t="game-pattern">Pattern Recognition</span></h3></div>
+        <div class="wcard"><div class="wcard-icon">🔢</div><h3><span data-t="game-number">Number Memory</span></h3></div>
+        <div class="wcard"><div class="wcard-icon">⚡</div><h3><span data-t="game-reaction">Reaction Time</span></h3></div>
+      </div>
+      <div id="t-home-ex-label" style="color:rgba(250,247,242,0.45);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px;">🧘 Exercises</div>
+      <div class="welcome-cards" style="margin-bottom:0;">
+        <div class="wcard"><div class="wcard-icon">🌬️</div><h3 id="t-home-breathing">Breathing</h3></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="showScreen('setup')"><span id="t-begin">Begin →</span></button>
+  </div>
+</section>
+
+<!-- ===== SETUP ===== -->
+<section class="screen" id="setup">
+  <div class="setup-card" style="margin:auto;">
+    <h2 id="t-setup-title">Patient Setup</h2>
+    <p id="t-setup-sub">Enter a few details before we begin the assessment.</p>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="patient-name" placeholder="e.g. Margaret Lim"/>
+    </div>
+    <div class="form-group">
+      <label>Age</label>
+      <input type="number" id="patient-age" placeholder="e.g. 72" min="50" max="110"/>
+    </div>
+    <div class="form-group">
+      <label>Gender</label>
+      <select id="patient-gender">
+        <option value="">Select...</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other / Prefer not to say</option>
+      </select>
+    </div>
+    <div class="setup-actions">
+      <button class="btn-secondary" id="t-back-setup" onclick="showScreen('welcome')">← Back</button>
+      <button class="btn-primary" onclick="startPatient()"><span id="t-start">Continue →</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- GAME HUB REMOVED - using patient-home -->
+
+<!-- ===== GAME SCREEN ===== -->
+<section class="screen" id="game-screen">
+  <div class="game-header">
+    <button class="back-btn" id="game-back-btn" onclick="exitGame()" style="font-size:1.5rem;padding:4px 10px;">←</button>
+    <h2 id="game-title" style="flex:1;">Game</h2>
+    <div class="timer-badge" id="timer-display">0:00</div>
+  </div>
+  <div id="exit-confirm" style="display:none;background:var(--warm);border-bottom:1px solid var(--border);padding:14px 24px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:0.92rem;color:var(--navy);flex:1;">Leave this game? Your progress will not be saved.</span>
+    <button onclick="confirmExitGame()" style="background:var(--terracotta);color:white;border:none;border-radius:100px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">Yes, leave</button>
+    <button onclick="cancelExitGame()" style="background:white;border:1px solid var(--border);border-radius:100px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;">Keep playing</button>
+  </div>
+  <div class="game-body">
+    <div class="game-instructions"><p id="game-instructions-text"></p></div>
+    <div class="game-area" id="game-area"></div>
+    <div class="text-center mt-16" id="game-action-area"></div>
+  </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<section class="screen" id="results">
+  <div class="results-header">
+    <h2 id="t-res-title">Assessment Complete</h2>
+    <p id="results-patient-line">Results for patient</p>
+  </div>
+  <div class="results-content">
+    <div class="results-summary" id="results-summary"></div>
+    <div class="game-results">
+      <h3>Game-by-Game Breakdown</h3>
+      <div id="results-breakdown"></div>
+    </div>
+    <div class="saved-indicator">✅ Results saved to session log</div>
+    <div class="results-actions">
+      <button class="btn-primary" onclick="resetAndRestart()"><span id="t-res-new">New Assessment</span></button>
+      <button class="btn-secondary" onclick="openDashboard()">👩‍⚕️ Caregiver View</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DATA VIEWER ===== -->
+<section class="screen" id="data-screen">
+  <div class="data-header">
+    <button class="back-btn" onclick="showScreen('welcome')">←</button>
+    <h2 id="t-data-title">Dataset Viewer</h2>
+  </div>
+  <div class="data-content">
+    <div class="data-stats" id="data-stats">
+      <div class="data-stat"><div class="dl">Status</div><div class="dv" style="color:var(--muted);font-size:1rem;">No dataset loaded</div></div>
+    </div>
+    <div id="data-table-wrap"></div>
+  </div>
+</section>
+
+<script>
+// ========== STATE ==========
+let patient = { name:'', age:'', gender:'' };
+let csvData = [{"Subject ID":"OAS2_0001","MRI ID":"OAS2_0001_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"87","EDUC":"14","SES":"2","MMSE":"27","CDR":"0","eTIV":"1987","nWBV":"0.696","ASF":"0.883"},{"Subject ID":"OAS2_0001","MRI ID":"OAS2_0001_MR2","Group":"Nondemented","Visit":"2","MR Delay":"457","M/F":"M","Hand":"R","Age":"88","EDUC":"14","SES":"2","MMSE":"30","CDR":"0","eTIV":"2004","nWBV":"0.681","ASF":"0.876"},{"Subject ID":"OAS2_0002","MRI ID":"OAS2_0002_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"75","EDUC":"12","SES":"","MMSE":"23","CDR":"0.5","eTIV":"1678","nWBV":"0.736","ASF":"1.046"},{"Subject ID":"OAS2_0002","MRI ID":"OAS2_0002_MR2","Group":"Demented","Visit":"2","MR Delay":"560","M/F":"M","Hand":"R","Age":"76","EDUC":"12","SES":"","MMSE":"28","CDR":"0.5","eTIV":"1738","nWBV":"0.713","ASF":"1.010"},{"Subject ID":"OAS2_0002","MRI ID":"OAS2_0002_MR3","Group":"Demented","Visit":"3","MR Delay":"1895","M/F":"M","Hand":"R","Age":"80","EDUC":"12","SES":"","MMSE":"22","CDR":"0.5","eTIV":"1698","nWBV":"0.701","ASF":"1.034"},{"Subject ID":"OAS2_0004","MRI ID":"OAS2_0004_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"88","EDUC":"18","SES":"3","MMSE":"28","CDR":"0","eTIV":"1215","nWBV":"0.710","ASF":"1.444"},{"Subject ID":"OAS2_0004","MRI ID":"OAS2_0004_MR2","Group":"Nondemented","Visit":"2","MR Delay":"538","M/F":"F","Hand":"R","Age":"90","EDUC":"18","SES":"3","MMSE":"27","CDR":"0","eTIV":"1200","nWBV":"0.718","ASF":"1.462"},{"Subject ID":"OAS2_0005","MRI ID":"OAS2_0005_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"80","EDUC":"12","SES":"4","MMSE":"28","CDR":"0","eTIV":"1689","nWBV":"0.712","ASF":"1.039"},{"Subject ID":"OAS2_0005","MRI ID":"OAS2_0005_MR2","Group":"Nondemented","Visit":"2","MR Delay":"1010","M/F":"M","Hand":"R","Age":"83","EDUC":"12","SES":"4","MMSE":"29","CDR":"0.5","eTIV":"1701","nWBV":"0.711","ASF":"1.032"},{"Subject ID":"OAS2_0005","MRI ID":"OAS2_0005_MR3","Group":"Nondemented","Visit":"3","MR Delay":"1603","M/F":"M","Hand":"R","Age":"85","EDUC":"12","SES":"4","MMSE":"30","CDR":"0","eTIV":"1699","nWBV":"0.705","ASF":"1.033"},{"Subject ID":"OAS2_0007","MRI ID":"OAS2_0007_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"71","EDUC":"16","SES":"","MMSE":"28","CDR":"0.5","eTIV":"1357","nWBV":"0.748","ASF":"1.293"},{"Subject ID":"OAS2_0007","MRI ID":"OAS2_0007_MR3","Group":"Demented","Visit":"3","MR Delay":"518","M/F":"M","Hand":"R","Age":"73","EDUC":"16","SES":"","MMSE":"27","CDR":"1","eTIV":"1365","nWBV":"0.727","ASF":"1.286"},{"Subject ID":"OAS2_0007","MRI ID":"OAS2_0007_MR4","Group":"Demented","Visit":"4","MR Delay":"1281","M/F":"M","Hand":"R","Age":"75","EDUC":"16","SES":"","MMSE":"27","CDR":"1","eTIV":"1372","nWBV":"0.710","ASF":"1.279"},{"Subject ID":"OAS2_0008","MRI ID":"OAS2_0008_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"93","EDUC":"14","SES":"2","MMSE":"30","CDR":"0","eTIV":"1272","nWBV":"0.698","ASF":"1.380"},{"Subject ID":"OAS2_0008","MRI ID":"OAS2_0008_MR2","Group":"Nondemented","Visit":"2","MR Delay":"742","M/F":"F","Hand":"R","Age":"95","EDUC":"14","SES":"2","MMSE":"29","CDR":"0","eTIV":"1257","nWBV":"0.703","ASF":"1.396"},{"Subject ID":"OAS2_0009","MRI ID":"OAS2_0009_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"68","EDUC":"12","SES":"2","MMSE":"27","CDR":"0.5","eTIV":"1457","nWBV":"0.806","ASF":"1.205"},{"Subject ID":"OAS2_0009","MRI ID":"OAS2_0009_MR2","Group":"Demented","Visit":"2","MR Delay":"576","M/F":"M","Hand":"R","Age":"69","EDUC":"12","SES":"2","MMSE":"24","CDR":"0.5","eTIV":"1480","nWBV":"0.791","ASF":"1.186"},{"Subject ID":"OAS2_0010","MRI ID":"OAS2_0010_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"66","EDUC":"12","SES":"3","MMSE":"30","CDR":"0.5","eTIV":"1447","nWBV":"0.769","ASF":"1.213"},{"Subject ID":"OAS2_0010","MRI ID":"OAS2_0010_MR2","Group":"Demented","Visit":"2","MR Delay":"854","M/F":"F","Hand":"R","Age":"68","EDUC":"12","SES":"3","MMSE":"29","CDR":"0.5","eTIV":"1482","nWBV":"0.752","ASF":"1.184"},{"Subject ID":"OAS2_0012","MRI ID":"OAS2_0012_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"16","SES":"2","MMSE":"29","CDR":"0","eTIV":"1333","nWBV":"0.748","ASF":"1.316"},{"Subject ID":"OAS2_0012","MRI ID":"OAS2_0012_MR2","Group":"Nondemented","Visit":"2","MR Delay":"730","M/F":"F","Hand":"R","Age":"80","EDUC":"16","SES":"2","MMSE":"29","CDR":"0","eTIV":"1323","nWBV":"0.738","ASF":"1.326"},{"Subject ID":"OAS2_0013","MRI ID":"OAS2_0013_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"81","EDUC":"12","SES":"4","MMSE":"30","CDR":"0","eTIV":"1230","nWBV":"0.715","ASF":"1.427"},{"Subject ID":"OAS2_0014","MRI ID":"OAS2_0014_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"76","EDUC":"16","SES":"3","MMSE":"21","CDR":"0.5","eTIV":"1602","nWBV":"0.697","ASF":"1.096"},{"Subject ID":"OAS2_0014","MRI ID":"OAS2_0014_MR2","Group":"Demented","Visit":"2","MR Delay":"504","M/F":"M","Hand":"R","Age":"77","EDUC":"16","SES":"3","MMSE":"16","CDR":"1","eTIV":"1590","nWBV":"0.696","ASF":"1.104"},{"Subject ID":"OAS2_0016","MRI ID":"OAS2_0016_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"88","EDUC":"8","SES":"4","MMSE":"25","CDR":"0.5","eTIV":"1651","nWBV":"0.660","ASF":"1.063"},{"Subject ID":"OAS2_0017","MRI ID":"OAS2_0017_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"80","EDUC":"12","SES":"3","MMSE":"29","CDR":"0","eTIV":"1783","nWBV":"0.752","ASF":"0.985"},{"Subject ID":"OAS2_0018","MRI ID":"OAS2_0018_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"87","EDUC":"14","SES":"1","MMSE":"30","CDR":"0","eTIV":"1406","nWBV":"0.715","ASF":"1.248"},{"Subject ID":"OAS2_0020","MRI ID":"OAS2_0020_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"80","EDUC":"20","SES":"1","MMSE":"29","CDR":"0","eTIV":"1587","nWBV":"0.693","ASF":"1.106"},{"Subject ID":"OAS2_0021","MRI ID":"OAS2_0021_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"72","EDUC":"20","SES":"1","MMSE":"26","CDR":"0.5","eTIV":"1911","nWBV":"0.719","ASF":"0.919"},{"Subject ID":"OAS2_0022","MRI ID":"OAS2_0022_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"61","EDUC":"16","SES":"3","MMSE":"30","CDR":"0","eTIV":"1313","nWBV":"0.805","ASF":"1.337"},{"Subject ID":"OAS2_0023","MRI ID":"OAS2_0023_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"86","EDUC":"12","SES":"4","MMSE":"21","CDR":"0.5","eTIV":"1247","nWBV":"0.662","ASF":"1.407"},{"Subject ID":"OAS2_0026","MRI ID":"OAS2_0026_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"82","EDUC":"12","SES":"3","MMSE":"27","CDR":"0.5","eTIV":"1420","nWBV":"0.713","ASF":"1.236"},{"Subject ID":"OAS2_0027","MRI ID":"OAS2_0027_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"12","SES":"3","MMSE":"29","CDR":"0","eTIV":"1365","nWBV":"0.783","ASF":"1.286"},{"Subject ID":"OAS2_0028","MRI ID":"OAS2_0028_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"64","EDUC":"18","SES":"2","MMSE":"22","CDR":"0.5","eTIV":"1547","nWBV":"0.737","ASF":"1.134"},{"Subject ID":"OAS2_0029","MRI ID":"OAS2_0029_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"77","EDUC":"12","SES":"4","MMSE":"29","CDR":"0","eTIV":"1377","nWBV":"0.734","ASF":"1.275"},{"Subject ID":"OAS2_0030","MRI ID":"OAS2_0030_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"60","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1402","nWBV":"0.822","ASF":"1.252"},{"Subject ID":"OAS2_0031","MRI ID":"OAS2_0031_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"86","EDUC":"12","SES":"3","MMSE":"30","CDR":"0","eTIV":"1430","nWBV":"0.718","ASF":"1.227"},{"Subject ID":"OAS2_0032","MRI ID":"OAS2_0032_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"90","EDUC":"12","SES":"3","MMSE":"21","CDR":"0.5","eTIV":"1307","nWBV":"0.679","ASF":"1.342"},{"Subject ID":"OAS2_0034","MRI ID":"OAS2_0034_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"79","EDUC":"16","SES":"1","MMSE":"29","CDR":"0","eTIV":"1466","nWBV":"0.703","ASF":"1.197"},{"Subject ID":"OAS2_0035","MRI ID":"OAS2_0035_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"88","EDUC":"12","SES":"4","MMSE":"30","CDR":"0","eTIV":"1336","nWBV":"0.738","ASF":"1.313"},{"Subject ID":"OAS2_0036","MRI ID":"OAS2_0036_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"13","SES":"4","MMSE":"30","CDR":"0","eTIV":"1359","nWBV":"0.789","ASF":"1.291"},{"Subject ID":"OAS2_0037","MRI ID":"OAS2_0037_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"82","EDUC":"12","SES":"4","MMSE":"27","CDR":"0.5","eTIV":"1477","nWBV":"0.729","ASF":"1.188"},{"Subject ID":"OAS2_0039","MRI ID":"OAS2_0039_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"81","EDUC":"18","SES":"2","MMSE":"26","CDR":"0.5","eTIV":"1174","nWBV":"0.742","ASF":"1.495"},{"Subject ID":"OAS2_0040","MRI ID":"OAS2_0040_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"84","EDUC":"6","SES":"4","MMSE":"25","CDR":"0.5","eTIV":"1310","nWBV":"0.727","ASF":"1.339"},{"Subject ID":"OAS2_0041","MRI ID":"OAS2_0041_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"71","EDUC":"16","SES":"1","MMSE":"27","CDR":"0","eTIV":"1289","nWBV":"0.771","ASF":"1.362"},{"Subject ID":"OAS2_0042","MRI ID":"OAS2_0042_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"70","EDUC":"17","SES":"3","MMSE":"29","CDR":"0","eTIV":"1640","nWBV":"0.766","ASF":"1.070"},{"Subject ID":"OAS2_0043","MRI ID":"OAS2_0043_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"72","EDUC":"12","SES":"4","MMSE":"26","CDR":"0.5","eTIV":"1453","nWBV":"0.777","ASF":"1.208"},{"Subject ID":"OAS2_0044","MRI ID":"OAS2_0044_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"68","EDUC":"14","SES":"4","MMSE":"21","CDR":"1","eTIV":"1333","nWBV":"0.685","ASF":"1.317"},{"Subject ID":"OAS2_0045","MRI ID":"OAS2_0045_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"75","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1317","nWBV":"0.737","ASF":"1.332"},{"Subject ID":"OAS2_0046","MRI ID":"OAS2_0046_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"83","EDUC":"15","SES":"2","MMSE":"20","CDR":"0.5","eTIV":"1476","nWBV":"0.750","ASF":"1.189"},{"Subject ID":"OAS2_0047","MRI ID":"OAS2_0047_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"77","EDUC":"16","SES":"2","MMSE":"29","CDR":"0","eTIV":"1433","nWBV":"0.723","ASF":"1.225"},{"Subject ID":"OAS2_0048","MRI ID":"OAS2_0048_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"66","EDUC":"16","SES":"1","MMSE":"19","CDR":"1","eTIV":"1695","nWBV":"0.711","ASF":"1.036"},{"Subject ID":"OAS2_0049","MRI ID":"OAS2_0049_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"16","SES":"3","MMSE":"30","CDR":"0","eTIV":"1491","nWBV":"0.794","ASF":"1.177"},{"Subject ID":"OAS2_0050","MRI ID":"OAS2_0050_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"71","EDUC":"12","SES":"4","MMSE":"20","CDR":"0.5","eTIV":"1461","nWBV":"0.724","ASF":"1.202"},{"Subject ID":"OAS2_0051","MRI ID":"OAS2_0051_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"92","EDUC":"23","SES":"1","MMSE":"29","CDR":"0","eTIV":"1454","nWBV":"0.701","ASF":"1.207"},{"Subject ID":"OAS2_0052","MRI ID":"OAS2_0052_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"74","EDUC":"18","SES":"2","MMSE":"29","CDR":"0","eTIV":"1463","nWBV":"0.737","ASF":"1.199"},{"Subject ID":"OAS2_0053","MRI ID":"OAS2_0053_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"82","EDUC":"16","SES":"3","MMSE":"29","CDR":"0","eTIV":"1484","nWBV":"0.760","ASF":"1.183"},{"Subject ID":"OAS2_0054","MRI ID":"OAS2_0054_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"85","EDUC":"18","SES":"1","MMSE":"29","CDR":"0","eTIV":"1264","nWBV":"0.701","ASF":"1.388"},{"Subject ID":"OAS2_0055","MRI ID":"OAS2_0055_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"65","EDUC":"13","SES":"3","MMSE":"29","CDR":"0","eTIV":"1362","nWBV":"0.837","ASF":"1.289"},{"Subject ID":"OAS2_0056","MRI ID":"OAS2_0056_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"71","EDUC":"14","SES":"2","MMSE":"28","CDR":"0","eTIV":"1461","nWBV":"0.756","ASF":"1.202"},{"Subject ID":"OAS2_0058","MRI ID":"OAS2_0058_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"78","EDUC":"14","SES":"3","MMSE":"30","CDR":"0.5","eTIV":"1315","nWBV":"0.707","ASF":"1.335"},{"Subject ID":"OAS2_0060","MRI ID":"OAS2_0060_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"75","EDUC":"13","SES":"4","MMSE":"29","CDR":"0.5","eTIV":"1416","nWBV":"0.766","ASF":"1.239"},{"Subject ID":"OAS2_0061","MRI ID":"OAS2_0061_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"68","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1654","nWBV":"0.747","ASF":"1.061"},{"Subject ID":"OAS2_0062","MRI ID":"OAS2_0062_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"79","EDUC":"18","SES":"2","MMSE":"29","CDR":"0","eTIV":"1641","nWBV":"0.695","ASF":"1.069"},{"Subject ID":"OAS2_0063","MRI ID":"OAS2_0063_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"80","EDUC":"12","SES":"","MMSE":"30","CDR":"0.5","eTIV":"1430","nWBV":"0.737","ASF":"1.228"},{"Subject ID":"OAS2_0064","MRI ID":"OAS2_0064_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"8","SES":"5","MMSE":"23","CDR":"1","eTIV":"1462","nWBV":"0.691","ASF":"1.200"},{"Subject ID":"OAS2_0066","MRI ID":"OAS2_0066_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"61","EDUC":"18","SES":"1","MMSE":"30","CDR":"1","eTIV":"1957","nWBV":"0.734","ASF":"0.897"},{"Subject ID":"OAS2_0067","MRI ID":"OAS2_0067_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"67","EDUC":"12","SES":"4","MMSE":"30","CDR":"0","eTIV":"1440","nWBV":"0.727","ASF":"1.219"},{"Subject ID":"OAS2_0068","MRI ID":"OAS2_0068_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"88","EDUC":"12","SES":"3","MMSE":"30","CDR":"0","eTIV":"1428","nWBV":"0.700","ASF":"1.229"},{"Subject ID":"OAS2_0069","MRI ID":"OAS2_0069_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"81","EDUC":"18","SES":"2","MMSE":"29","CDR":"0","eTIV":"1470","nWBV":"0.687","ASF":"1.194"},{"Subject ID":"OAS2_0070","MRI ID":"OAS2_0070_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"80","EDUC":"17","SES":"1","MMSE":"28","CDR":"0","eTIV":"1660","nWBV":"0.728","ASF":"1.057"},{"Subject ID":"OAS2_0071","MRI ID":"OAS2_0071_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"83","EDUC":"13","SES":"2","MMSE":"27","CDR":"1","eTIV":"1391","nWBV":"0.705","ASF":"1.262"},{"Subject ID":"OAS2_0073","MRI ID":"OAS2_0073_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"70","EDUC":"14","SES":"3","MMSE":"29","CDR":"0","eTIV":"1524","nWBV":"0.787","ASF":"1.151"},{"Subject ID":"OAS2_0075","MRI ID":"OAS2_0075_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"8","SES":"5","MMSE":"25","CDR":"0.5","eTIV":"1151","nWBV":"0.743","ASF":"1.525"},{"Subject ID":"OAS2_0076","MRI ID":"OAS2_0076_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"66","EDUC":"18","SES":"2","MMSE":"30","CDR":"0","eTIV":"1504","nWBV":"0.725","ASF":"1.167"},{"Subject ID":"OAS2_0077","MRI ID":"OAS2_0077_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"69","EDUC":"16","SES":"2","MMSE":"28","CDR":"0","eTIV":"1848","nWBV":"0.737","ASF":"0.950"},{"Subject ID":"OAS2_0078","MRI ID":"OAS2_0078_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"89","EDUC":"16","SES":"1","MMSE":"28","CDR":"0","eTIV":"1631","nWBV":"0.674","ASF":"1.076"},{"Subject ID":"OAS2_0079","MRI ID":"OAS2_0079_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"12","SES":"4","MMSE":"23","CDR":"0.5","eTIV":"1447","nWBV":"0.759","ASF":"1.213"},{"Subject ID":"OAS2_0080","MRI ID":"OAS2_0080_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"66","EDUC":"15","SES":"2","MMSE":"25","CDR":"0.5","eTIV":"1548","nWBV":"0.727","ASF":"1.134"},{"Subject ID":"OAS2_0081","MRI ID":"OAS2_0081_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"82","EDUC":"12","SES":"4","MMSE":"26","CDR":"0.5","eTIV":"1271","nWBV":"0.695","ASF":"1.381"},{"Subject ID":"OAS2_0085","MRI ID":"OAS2_0085_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"8","SES":"5","MMSE":"29","CDR":"0","eTIV":"1383","nWBV":"0.756","ASF":"1.269"},{"Subject ID":"OAS2_0086","MRI ID":"OAS2_0086_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"63","EDUC":"15","SES":"2","MMSE":"28","CDR":"0","eTIV":"1544","nWBV":"0.805","ASF":"1.136"},{"Subject ID":"OAS2_0087","MRI ID":"OAS2_0087_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"96","EDUC":"17","SES":"1","MMSE":"26","CDR":"1","eTIV":"1465","nWBV":"0.683","ASF":"1.198"},{"Subject ID":"OAS2_0088","MRI ID":"OAS2_0088_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"78","EDUC":"12","SES":"4","MMSE":"21","CDR":"1","eTIV":"1477","nWBV":"0.672","ASF":"1.188"},{"Subject ID":"OAS2_0089","MRI ID":"OAS2_0089_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"70","EDUC":"12","SES":"2","MMSE":"29","CDR":"0.5","eTIV":"1432","nWBV":"0.692","ASF":"1.225"},{"Subject ID":"OAS2_0090","MRI ID":"OAS2_0090_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"73","EDUC":"18","SES":"2","MMSE":"29","CDR":"0","eTIV":"1548","nWBV":"0.773","ASF":"1.134"},{"Subject ID":"OAS2_0091","MRI ID":"OAS2_0091_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"75","EDUC":"12","SES":"4","MMSE":"28","CDR":"0","eTIV":"1511","nWBV":"0.739","ASF":"1.162"},{"Subject ID":"OAS2_0092","MRI ID":"OAS2_0092_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"83","EDUC":"12","SES":"2","MMSE":"28","CDR":"0","eTIV":"1383","nWBV":"0.748","ASF":"1.269"},{"Subject ID":"OAS2_0094","MRI ID":"OAS2_0094_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"61","EDUC":"16","SES":"1","MMSE":"30","CDR":"0","eTIV":"1513","nWBV":"0.771","ASF":"1.160"},{"Subject ID":"OAS2_0095","MRI ID":"OAS2_0095_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"71","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1769","nWBV":"0.699","ASF":"0.992"},{"Subject ID":"OAS2_0097","MRI ID":"OAS2_0097_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"74","EDUC":"16","SES":"2","MMSE":"30","CDR":"0","eTIV":"1611","nWBV":"0.729","ASF":"1.089"},{"Subject ID":"OAS2_0098","MRI ID":"OAS2_0098_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"66","EDUC":"12","SES":"4","MMSE":"30","CDR":"0.5","eTIV":"1446","nWBV":"0.780","ASF":"1.214"},{"Subject ID":"OAS2_0099","MRI ID":"OAS2_0099_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"80","EDUC":"12","SES":"","MMSE":"27","CDR":"0.5","eTIV":"1475","nWBV":"0.762","ASF":"1.190"},{"Subject ID":"OAS2_0100","MRI ID":"OAS2_0100_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"77","EDUC":"11","SES":"4","MMSE":"29","CDR":"0","eTIV":"1583","nWBV":"0.777","ASF":"1.108"},{"Subject ID":"OAS2_0101","MRI ID":"OAS2_0101_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"71","EDUC":"18","SES":"2","MMSE":"30","CDR":"0","eTIV":"1371","nWBV":"0.769","ASF":"1.280"},{"Subject ID":"OAS2_0102","MRI ID":"OAS2_0102_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"82","EDUC":"15","SES":"3","MMSE":"29","CDR":"0.5","eTIV":"1499","nWBV":"0.689","ASF":"1.171"},{"Subject ID":"OAS2_0103","MRI ID":"OAS2_0103_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"16","SES":"1","MMSE":"30","CDR":"0","eTIV":"1404","nWBV":"0.750","ASF":"1.250"},{"Subject ID":"OAS2_0104","MRI ID":"OAS2_0104_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"70","EDUC":"16","SES":"1","MMSE":"25","CDR":"0.5","eTIV":"1568","nWBV":"0.696","ASF":"1.119"},{"Subject ID":"OAS2_0105","MRI ID":"OAS2_0105_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"86","EDUC":"12","SES":"4","MMSE":"29","CDR":"0","eTIV":"1783","nWBV":"0.703","ASF":"0.984"},{"Subject ID":"OAS2_0106","MRI ID":"OAS2_0106_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"70","EDUC":"11","SES":"4","MMSE":"22","CDR":"1","eTIV":"1445","nWBV":"0.722","ASF":"1.214"},{"Subject ID":"OAS2_0108","MRI ID":"OAS2_0108_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"77","EDUC":"18","SES":"1","MMSE":"25","CDR":"0.5","eTIV":"1604","nWBV":"0.781","ASF":"1.094"},{"Subject ID":"OAS2_0109","MRI ID":"OAS2_0109_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"81","EDUC":"11","SES":"4","MMSE":"28","CDR":"0","eTIV":"1750","nWBV":"0.670","ASF":"1.003"},{"Subject ID":"OAS2_0111","MRI ID":"OAS2_0111_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"62","EDUC":"12","SES":"4","MMSE":"17","CDR":"0.5","eTIV":"1525","nWBV":"0.732","ASF":"1.151"},{"Subject ID":"OAS2_0112","MRI ID":"OAS2_0112_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"76","EDUC":"12","SES":"3","MMSE":"27","CDR":"0.5","eTIV":"1315","nWBV":"0.698","ASF":"1.335"},{"Subject ID":"OAS2_0113","MRI ID":"OAS2_0113_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"13","SES":"2","MMSE":"23","CDR":"0.5","eTIV":"1536","nWBV":"0.725","ASF":"1.142"},{"Subject ID":"OAS2_0116","MRI ID":"OAS2_0116_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"12","SES":"3","MMSE":"27","CDR":"0.5","eTIV":"1425","nWBV":"0.769","ASF":"1.232"},{"Subject ID":"OAS2_0117","MRI ID":"OAS2_0117_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"73","EDUC":"20","SES":"2","MMSE":"30","CDR":"0","eTIV":"1842","nWBV":"0.758","ASF":"0.953"},{"Subject ID":"OAS2_0118","MRI ID":"OAS2_0118_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"67","EDUC":"14","SES":"4","MMSE":"30","CDR":"0","eTIV":"1508","nWBV":"0.794","ASF":"1.164"},{"Subject ID":"OAS2_0119","MRI ID":"OAS2_0119_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"81","EDUC":"15","SES":"2","MMSE":"28","CDR":"0","eTIV":"1486","nWBV":"0.754","ASF":"1.181"},{"Subject ID":"OAS2_0120","MRI ID":"OAS2_0120_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"76","EDUC":"14","SES":"3","MMSE":"25","CDR":"1","eTIV":"1409","nWBV":"0.715","ASF":"1.246"},{"Subject ID":"OAS2_0121","MRI ID":"OAS2_0121_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"11","SES":"4","MMSE":"30","CDR":"0","eTIV":"1475","nWBV":"0.726","ASF":"1.190"},{"Subject ID":"OAS2_0122","MRI ID":"OAS2_0122_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"86","EDUC":"16","SES":"3","MMSE":"30","CDR":"0","eTIV":"1293","nWBV":"0.747","ASF":"1.357"},{"Subject ID":"OAS2_0124","MRI ID":"OAS2_0124_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"70","EDUC":"16","SES":"3","MMSE":"29","CDR":"0.5","eTIV":"1463","nWBV":"0.749","ASF":"1.200"},{"Subject ID":"OAS2_0126","MRI ID":"OAS2_0126_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"74","EDUC":"12","SES":"3","MMSE":"29","CDR":"0","eTIV":"1344","nWBV":"0.739","ASF":"1.306"},{"Subject ID":"OAS2_0127","MRI ID":"OAS2_0127_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"79","EDUC":"18","SES":"1","MMSE":"29","CDR":"0","eTIV":"1644","nWBV":"0.729","ASF":"1.067"},{"Subject ID":"OAS2_0128","MRI ID":"OAS2_0128_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"76","EDUC":"16","SES":"1","MMSE":"28","CDR":"0","eTIV":"1346","nWBV":"0.762","ASF":"1.304"},{"Subject ID":"OAS2_0129","MRI ID":"OAS2_0129_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1440","nWBV":"0.666","ASF":"1.219"},{"Subject ID":"OAS2_0131","MRI ID":"OAS2_0131_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"65","EDUC":"12","SES":"2","MMSE":"30","CDR":"0.5","eTIV":"1340","nWBV":"0.754","ASF":"1.309"},{"Subject ID":"OAS2_0133","MRI ID":"OAS2_0133_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"12","SES":"3","MMSE":"29","CDR":"0","eTIV":"1475","nWBV":"0.731","ASF":"1.190"},{"Subject ID":"OAS2_0134","MRI ID":"OAS2_0134_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"70","EDUC":"11","SES":"4","MMSE":"29","CDR":"0.5","eTIV":"1295","nWBV":"0.748","ASF":"1.355"},{"Subject ID":"OAS2_0135","MRI ID":"OAS2_0135_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"74","EDUC":"18","SES":"2","MMSE":"30","CDR":"0","eTIV":"1636","nWBV":"0.680","ASF":"1.073"},{"Subject ID":"OAS2_0137","MRI ID":"OAS2_0137_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"74","EDUC":"18","SES":"2","MMSE":"28","CDR":"0.5","eTIV":"1659","nWBV":"0.739","ASF":"1.058"},{"Subject ID":"OAS2_0138","MRI ID":"OAS2_0138_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"16","SES":"2","MMSE":"29","CDR":"0","eTIV":"1123","nWBV":"0.786","ASF":"1.563"},{"Subject ID":"OAS2_0139","MRI ID":"OAS2_0139_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"67","EDUC":"16","SES":"1","MMSE":"29","CDR":"0.5","eTIV":"1337","nWBV":"0.766","ASF":"1.312"},{"Subject ID":"OAS2_0140","MRI ID":"OAS2_0140_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"76","EDUC":"16","SES":"3","MMSE":"26","CDR":"0.5","eTIV":"1391","nWBV":"0.705","ASF":"1.262"},{"Subject ID":"OAS2_0141","MRI ID":"OAS2_0141_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"65","EDUC":"18","SES":"2","MMSE":"30","CDR":"0","eTIV":"1277","nWBV":"0.812","ASF":"1.374"},{"Subject ID":"OAS2_0142","MRI ID":"OAS2_0142_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"69","EDUC":"16","SES":"3","MMSE":"29","CDR":"0","eTIV":"1380","nWBV":"0.819","ASF":"1.272"},{"Subject ID":"OAS2_0143","MRI ID":"OAS2_0143_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"89","EDUC":"18","SES":"2","MMSE":"30","CDR":"0","eTIV":"1715","nWBV":"0.746","ASF":"1.023"},{"Subject ID":"OAS2_0144","MRI ID":"OAS2_0144_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"77","EDUC":"16","SES":"1","MMSE":"30","CDR":"0","eTIV":"1704","nWBV":"0.716","ASF":"1.030"},{"Subject ID":"OAS2_0145","MRI ID":"OAS2_0145_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"68","EDUC":"16","SES":"3","MMSE":"30","CDR":"0","eTIV":"1298","nWBV":"0.799","ASF":"1.352"},{"Subject ID":"OAS2_0146","MRI ID":"OAS2_0146_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"80","EDUC":"15","SES":"2","MMSE":"20","CDR":"1","eTIV":"1732","nWBV":"0.685","ASF":"1.013"},{"Subject ID":"OAS2_0147","MRI ID":"OAS2_0147_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"77","EDUC":"13","SES":"2","MMSE":"29","CDR":"0","eTIV":"1351","nWBV":"0.769","ASF":"1.299"},{"Subject ID":"OAS2_0149","MRI ID":"OAS2_0149_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"81","EDUC":"13","SES":"2","MMSE":"29","CDR":"0","eTIV":"1345","nWBV":"0.737","ASF":"1.305"},{"Subject ID":"OAS2_0150","MRI ID":"OAS2_0150_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"12","SES":"3","MMSE":"30","CDR":"0.5","eTIV":"1343","nWBV":"0.720","ASF":"1.306"},{"Subject ID":"OAS2_0152","MRI ID":"OAS2_0152_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"66","EDUC":"18","SES":"2","MMSE":"29","CDR":"0","eTIV":"1191","nWBV":"0.785","ASF":"1.474"},{"Subject ID":"OAS2_0154","MRI ID":"OAS2_0154_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"75","EDUC":"18","SES":"1","MMSE":"29","CDR":"0","eTIV":"1436","nWBV":"0.750","ASF":"1.222"},{"Subject ID":"OAS2_0156","MRI ID":"OAS2_0156_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"78","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1243","nWBV":"0.748","ASF":"1.412"},{"Subject ID":"OAS2_0157","MRI ID":"OAS2_0157_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"12","SES":"2","MMSE":"19","CDR":"1","eTIV":"1274","nWBV":"0.728","ASF":"1.377"},{"Subject ID":"OAS2_0158","MRI ID":"OAS2_0158_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"15","SES":"4","MMSE":"29","CDR":"0","eTIV":"1272","nWBV":"0.697","ASF":"1.380"},{"Subject ID":"OAS2_0159","MRI ID":"OAS2_0159_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"73","EDUC":"14","SES":"3","MMSE":"29","CDR":"0.5","eTIV":"1238","nWBV":"0.757","ASF":"1.418"},{"Subject ID":"OAS2_0160","MRI ID":"OAS2_0160_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"76","EDUC":"12","SES":"","MMSE":"27","CDR":"0.5","eTIV":"1557","nWBV":"0.705","ASF":"1.127"},{"Subject ID":"OAS2_0161","MRI ID":"OAS2_0161_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"77","EDUC":"16","SES":"1","MMSE":"29","CDR":"0","eTIV":"1818","nWBV":"0.734","ASF":"0.965"},{"Subject ID":"OAS2_0162","MRI ID":"OAS2_0162_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"82","EDUC":"14","SES":"2","MMSE":"23","CDR":"0.5","eTIV":"1514","nWBV":"0.678","ASF":"1.159"},{"Subject ID":"OAS2_0164","MRI ID":"OAS2_0164_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"77","EDUC":"20","SES":"1","MMSE":"23","CDR":"1","eTIV":"1713","nWBV":"0.756","ASF":"1.024"},{"Subject ID":"OAS2_0165","MRI ID":"OAS2_0165_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"78","EDUC":"12","SES":"3","MMSE":"23","CDR":"1","eTIV":"1491","nWBV":"0.710","ASF":"1.177"},{"Subject ID":"OAS2_0169","MRI ID":"OAS2_0169_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"71","EDUC":"18","SES":"1","MMSE":"30","CDR":"0","eTIV":"1426","nWBV":"0.731","ASF":"1.231"},{"Subject ID":"OAS2_0171","MRI ID":"OAS2_0171_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"76","EDUC":"16","SES":"3","MMSE":"30","CDR":"0","eTIV":"1832","nWBV":"0.769","ASF":"0.958"},{"Subject ID":"OAS2_0172","MRI ID":"OAS2_0172_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"75","EDUC":"16","SES":"1","MMSE":"30","CDR":"0.5","eTIV":"1891","nWBV":"0.709","ASF":"0.928"},{"Subject ID":"OAS2_0174","MRI ID":"OAS2_0174_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"60","EDUC":"12","SES":"4","MMSE":"30","CDR":"0","eTIV":"1379","nWBV":"0.806","ASF":"1.273"},{"Subject ID":"OAS2_0175","MRI ID":"OAS2_0175_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"70","EDUC":"16","SES":"4","MMSE":"26","CDR":"0.5","eTIV":"1796","nWBV":"0.742","ASF":"0.977"},{"Subject ID":"OAS2_0176","MRI ID":"OAS2_0176_MR1","Group":"Converted","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"84","EDUC":"16","SES":"2","MMSE":"30","CDR":"0","eTIV":"1404","nWBV":"0.710","ASF":"1.250"},{"Subject ID":"OAS2_0177","MRI ID":"OAS2_0177_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"68","EDUC":"14","SES":"3","MMSE":"26","CDR":"0","eTIV":"1444","nWBV":"0.778","ASF":"1.216"},{"Subject ID":"OAS2_0178","MRI ID":"OAS2_0178_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"89","EDUC":"14","SES":"2","MMSE":"29","CDR":"0","eTIV":"1509","nWBV":"0.756","ASF":"1.163"},{"Subject ID":"OAS2_0179","MRI ID":"OAS2_0179_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"79","EDUC":"20","SES":"1","MMSE":"26","CDR":"0.5","eTIV":"1548","nWBV":"0.711","ASF":"1.134"},{"Subject ID":"OAS2_0181","MRI ID":"OAS2_0181_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"74","EDUC":"12","SES":"","MMSE":"26","CDR":"0.5","eTIV":"1171","nWBV":"0.733","ASF":"1.499"},{"Subject ID":"OAS2_0182","MRI ID":"OAS2_0182_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"73","EDUC":"12","SES":"","MMSE":"23","CDR":"0.5","eTIV":"1661","nWBV":"0.698","ASF":"1.056"},{"Subject ID":"OAS2_0183","MRI ID":"OAS2_0183_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"66","EDUC":"13","SES":"2","MMSE":"30","CDR":"0","eTIV":"1495","nWBV":"0.746","ASF":"1.174"},{"Subject ID":"OAS2_0184","MRI ID":"OAS2_0184_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"72","EDUC":"16","SES":"3","MMSE":"24","CDR":"0.5","eTIV":"1354","nWBV":"0.733","ASF":"1.296"},{"Subject ID":"OAS2_0185","MRI ID":"OAS2_0185_MR1","Group":"Demented","Visit":"1","MR Delay":"0","M/F":"M","Hand":"R","Age":"80","EDUC":"16","SES":"1","MMSE":"28","CDR":"0.5","eTIV":"1704","nWBV":"0.711","ASF":"1.030"},{"Subject ID":"OAS2_0186","MRI ID":"OAS2_0186_MR1","Group":"Nondemented","Visit":"1","MR Delay":"0","M/F":"F","Hand":"R","Age":"61","EDUC":"13","SES":"2","MMSE":"30","CDR":"0","eTIV":"1319","nWBV":"0.801","ASF":"1.331"}];
+let gameScores = {};
+let currentGame = null;
+let gameSessionId = 0; // incremented on each game launch to cancel stale timeouts
+let timerInterval = null;
+let timerSeconds = 0;
+let sessionLog = JSON.parse(localStorage.getItem('mindcheck_log') || '[]');
+
+// ========== NAVIGATION ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ========== SETUP ==========
+function startAssessment() { startPatient(); }
+
+// ========== HUB ==========
+function updateHub() {
+  const games = ['memory','pattern','number','reaction'];
+  const done = games.filter(g => gameScores[g] !== undefined).length;
+  document.getElementById('hub-progress').style.width = `${(done/4)*100}%`;
+  games.forEach(g => {
+    const card = document.getElementById(`gc-${g}`);
+    card.classList.remove('completed');
+    if (gameScores[g] !== undefined) card.classList.add('completed');
+  });
+  if (done === 4) document.getElementById('finish-btn').style.display = 'inline-block';
+  else document.getElementById('finish-btn').style.display = 'none';
+}
+
+// ========== TIMER ==========
+function startTimer() {
+  timerSeconds = 0;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    const m = Math.floor(timerSeconds/60);
+    const s = timerSeconds%60;
+    document.getElementById('timer-display').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); return timerSeconds; }
+
+// ========== GAME LAUNCHER ==========
+function launchGame(type) {
+  gameSessionId++;
+  currentGame = type;
+  // Always reset game-area state so no stale pointerEvents from previous game
+  const ga = document.getElementById('game-area');
+  if (ga) { ga.style.pointerEvents = ''; ga.style.cursor = ''; }
+  showScreen('game-screen');
+  startTimer();
+  const t = translations[currentLang];
+  const titles = { memory: t['game-mem-name']||'Memory Match', pattern: t['game-pat-name']||'Pattern Recognition', number: t['game-num-name']||'Number Memory', reaction: t['game-reaction']||'Reaction Time' };
+  document.getElementById('game-title').textContent = titles[type];
+  if (type === 'memory') initMemory();
+  else if (type === 'word') initWord();
+  else if (type === 'pattern') initPattern();
+  else if (type === 'number') initNumber();
+  else if (type === 'reaction') initReaction();
+}
+
+// ========================================
+// GAME 1: MEMORY MATCH
+// ========================================
+const memoryEmojis = ['🌸','🦋','🍎','⭐','🐢','🌙','🎈','🦁'];
+let memCards = [], memFlipped = [], memMatched = 0, memMoves = 0, memStarted = false;
+
+function initMemory() {
+  document.getElementById('game-instructions-text').textContent = translations[currentLang]['instr-memory'];
+  memCards = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random()-0.5);
+  memFlipped = []; memMatched = 0; memMoves = 0; memStarted = false;
+  renderMemory();
+  document.getElementById('game-action-area').innerHTML = `<div class="score-badge" id="mem-score">🎯 Moves: 0</div>`;
+}
+
+function renderMemory() {
+  const area = document.getElementById('game-area');
+  area.innerHTML = `<div class="memory-grid">${memCards.map((e,i)=>`
+    <div class="mem-card" id="mc-${i}" onclick="flipCard(${i})">
+      <div class="front">?</div>
+      <div class="back">${e}</div>
+    </div>`).join('')}</div>`;
+}
+
+function flipCard(i) {
+  if (memFlipped.length === 2) return;
+  const card = document.getElementById(`mc-${i}`);
+  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  card.classList.add('flipped');
+  playFlip();
+  memFlipped.push(i);
+  if (memFlipped.length === 2) {
+    memMoves++;
+    document.getElementById('mem-score').textContent = `🎯 Moves: ${memMoves}`;
+    const [a,b] = memFlipped;
+    if (memCards[a] === memCards[b]) {
+      document.getElementById(`mc-${a}`).classList.add('matched');
+      document.getElementById(`mc-${b}`).classList.add('matched');
+      memMatched++;
+      memFlipped = [];
+      playMatch();
+      if (memMatched === 8) { playComplete(); finishMemory(); }
+    } else {
+      setTimeout(() => {
+        document.getElementById(`mc-${a}`)?.classList.remove('flipped');
+        document.getElementById(`mc-${b}`)?.classList.remove('flipped');
+        memFlipped = [];
+      playError();
+      }, 900);
+    }
+  }
+}
+
+function finishMemory() {
+  const t = stopTimer();
+  // Score purely on time: ≤30s = 100, scales to 0 at 180s
+  const score = Math.max(0, Math.min(100, Math.round(100 - ((t - 30) / 1.5))));
+  gameScores.memory = { score, moves: memMoves, time: t };
+  document.getElementById('game-action-area').innerHTML = `
+    <div class="score-badge">✅ Complete in ${Math.floor(t/60)}:${(t%60).toString().padStart(2,'0')}</div><br/>
+    <button class="btn-game" onclick="showHub()">← Back to Activities</button>`;
+  // pointerEvents intentionally NOT disabled — cards are already flipped/matched
+}
+
+// ========================================
+// GAME 2: WORD RECALL
+// ========================================
+const wordPool = ['Apple','River','Lamp','Chair','Pencil','Cloud','Sunset','Bread','Mirror','Garden','Letter','Bridge'];
+let wordTargets = [], wordPhase = 'study', wordStudyTimer = null;
+
+function initWord() {
+  document.getElementById('game-instructions-text').textContent = 'Study the words for 15 seconds, then type as many as you can remember.';
+  wordTargets = shuffle([...wordPool]).slice(0,6);
+  wordPhase = 'study';
+  renderWordStudy();
+}
+
+function renderWordStudy() {
+  let countdown = 15;
+  document.getElementById('game-area').innerHTML = `
+    <div class="word-display">
+      <div class="phase-label">Remember these words — <span id="word-countdown">15s</span> remaining</div>
+      <div class="word-list">${wordTargets.map(w=>`<div class="word-chip">${w}</div>`).join('')}</div>
+    </div>`;
+  document.getElementById('game-action-area').innerHTML = '';
+  wordStudyTimer = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('word-countdown');
+    if (el) el.textContent = `${countdown}s`;
+    if (countdown <= 0) { clearInterval(wordStudyTimer); renderWordRecall(); }
+  }, 1000);
+}
+
+function renderWordRecall() {
+  document.getElementById('game-area').innerHTML = `
+    <div class="word-display"><div class="phase-label">Now type the words you remember</div><div style="color:rgba(250,247,242,0.5);font-size:0.9rem;">Fill in as many boxes as you can</div></div>
+    <div class="word-input-grid">
+      ${Array(6).fill(0).map((_,i)=>`<input class="word-input" id="wi-${i}" placeholder="Word ${i+1}" />`).join('')}
+    </div>`;
+  document.getElementById('game-action-area').innerHTML = `<button class="btn-game" onclick="finishWord()">Submit Answers</button>`;
+}
+
+function finishWord() {
+  const answers = Array.from({length:6},(_,i)=>document.getElementById(`wi-${i}`)?.value.trim().toLowerCase()||'');
+  const targets = wordTargets.map(w=>w.toLowerCase());
+  let correct = 0;
+  answers.forEach((a,i) => {
+    const el = document.getElementById(`wi-${i}`);
+    if (a && targets.includes(a)) { correct++; el.classList.add('correct'); }
+    else if (a) el.classList.add('wrong');
+  });
+  const t = stopTimer();
+  const score = Math.round((correct/6)*100);
+  gameScores.word = { score, correct, total:6, time:t };
+  document.getElementById('game-action-area').innerHTML = `
+    <div class="score-badge">✅ ${correct}/6 words recalled</div><br/>
+    <button class="btn-game" onclick="showHub()">← Back to Activities</button>`;
+}
+
+// ========================================
+// GAME 3: PATTERN RECOGNITION
+// ========================================
+let patternQ = 0, patternCorrect = 0, patternLocked = false;
+let patternQuestions = [];
+
+function generatePatternQuestions() {
+  const basePatterns = [
+    [1,0,0, 0,1,0, 0,0,1],
+    [1,1,0, 1,0,0, 0,0,0],
+    [0,0,1, 0,1,0, 1,0,0],
+    [1,0,1, 0,1,0, 1,0,1],
+    [1,1,1, 0,0,0, 0,0,0],
+    [0,1,0, 1,0,1, 0,1,0],
+  ];
+  const qs = [];
+  const shuffledBase = shuffle([...basePatterns]);
+  for (let i = 0; i < 5; i++) {
+    const correct = shuffledBase[i % shuffledBase.length];
+    const wrongs = shuffledBase.filter(p => p !== correct).slice(0, 3);
+    const options = shuffle([correct, ...wrongs]);
+    qs.push({ correct, options });
+  }
+  return qs;
+}
+
+function initPattern() {
+  document.getElementById('game-instructions-text').textContent = translations[currentLang]['instr-pattern'];
+  patternQ = 0; patternCorrect = 0; patternLocked = false;
+  patternQuestions = generatePatternQuestions();
+  renderPattern();
+}
+
+function renderPattern() {
+  if (patternQ >= patternQuestions.length) { finishPattern(); return; }
+  const q = patternQuestions[patternQ];
+  const mainGrid = q.correct.map(v => `<div class="pattern-cell" style="background:${v ? 'var(--sage)' : 'var(--warm)'};border-radius:8px;aspect-ratio:1;"></div>`).join('');
+  const optionsHTML = q.options.map((opt, oi) => {
+    const mini = opt.map(v => `<div class="mini-cell" style="background:${v ? 'var(--sage)' : 'var(--warm)'};width:100%;aspect-ratio:1;border-radius:3px;"></div>`).join('');
+    return `<div class="pattern-option" id="po-${oi}" onclick="selectPattern(${oi})">
+      <div class="mini-grid" style="grid-template-columns:repeat(3,1fr);gap:4px;">${mini}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('game-area').innerHTML = `
+    <div style="text-align:center;margin-bottom:12px;color:var(--muted);font-size:0.85rem;">Question ${patternQ + 1} of ${patternQuestions.length}</div>
+    <div style="display:flex;justify-content:center;margin-bottom:24px;">
+      <div style="background:white;border:2px solid var(--border);border-radius:16px;padding:20px;">
+        <div style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:10px;">The Pattern</div>
+        <div class="pattern-grid" style="grid-template-columns:repeat(3,52px);gap:8px;">${mainGrid}</div>
+      </div>
+    </div>
+    <div class="pattern-options">${optionsHTML}</div>`;
+  document.getElementById('game-action-area').innerHTML = '';
+}
+
+function selectPattern(oi) {
+  if (patternLocked) return;
+  if (!patternQuestions || !patternQuestions.length || patternQ >= patternQuestions.length) return;
+  const q = patternQuestions[patternQ];
+  if (!q || !q.options) return;
+  const chosenEl = document.getElementById('po-' + oi);
+  if (!chosenEl) return;
+  patternLocked = true;
+  // Disable all options immediately via direct style on each
+  for (let k = 0; k < 4; k++) {
+    const el = document.getElementById('po-' + k);
+    if (el) { el.style.pointerEvents = 'none'; el.style.cursor = 'default'; }
+  }
+  const selected = q.options[oi];
+  const isRight = JSON.stringify(selected) === JSON.stringify(q.correct);
+  chosenEl.classList.add(isRight ? 'correct-ans' : 'wrong-ans');
+  isRight ? playMatch() : playError();
+  if (isRight) {
+    patternCorrect++;
+  } else {
+    for (let k = 0; k < q.options.length; k++) {
+      if (JSON.stringify(q.options[k]) === JSON.stringify(q.correct)) {
+        const el = document.getElementById('po-' + k);
+        if (el) el.classList.add('correct-ans');
+      }
+    }
+  }
+  if (patternQ + 1 >= patternQuestions.length && isRight) setTimeout(playComplete, 600);
+  const nextQ = patternQ + 1;
+  const _sid = gameSessionId;
+  setTimeout(() => {
+    if (gameSessionId !== _sid) return; // stale, game was exited
+    patternQ = nextQ;
+    patternLocked = false;
+    renderPattern();
+  }, 1200);
+}
+
+function finishPattern() {
+  const t = stopTimer();
+  const score = Math.round((patternCorrect/patternQuestions.length)*100);
+  gameScores.pattern = { score, correct: patternCorrect, total: patternQuestions.length, time:t };
+  document.getElementById('game-area').innerHTML = '';
+  document.getElementById('game-action-area').innerHTML = `
+    <div class="score-badge">✅ ${patternCorrect}/${patternQuestions.length} patterns correct</div><br/>
+    <button class="btn-game" onclick="showHub()">← Back to Activities</button>`;
+}
+
+// ========================================
+// GAME 4: NUMBER MEMORY
+// ========================================
+let numRound = 0, numCorrect = 0, numLength = 3, numSequence = '';
+const numRounds = 6;
+
+function initNumber() {
+  document.getElementById('game-instructions-text').textContent = translations[currentLang]['instr-number'];
+  numRound = 0; numCorrect = 0; numLength = 3;
+  renderNumberRound();
+}
+
+function generateSequence(len) {
+  return Array.from({length:len},()=>Math.floor(Math.random()*9)+1).join('');
+}
+
+function renderNumberRound() {
+  if (numRound >= numRounds) { finishNumber(); return; }
+  numSequence = generateSequence(numLength);
+  let countdown = numLength;
+  // Show the number with a countdown
+  const showDisplay = (cd) => `
+    <div class="number-display">
+      <div style="color:rgba(250,247,242,0.5);font-size:0.85rem;margin-bottom:12px;">Round ${numRound+1} of ${numRounds}</div>
+      <div class="number-sequence" id="num-seq-display">${numSequence}</div>
+      <div class="number-hint">Remember this — <span id="num-cd">${cd}</span>s</div>
+    </div>`;
+  document.getElementById('game-area').innerHTML = showDisplay(countdown);
+  document.getElementById('game-action-area').innerHTML = '';
+  const cdInterval = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('num-cd');
+    if (el) el.textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(cdInterval);
+      renderNumberInput();
+    }
+  }, 1000);
+}
+
+function renderNumberInput() {
+  numPadValue = '';
+  const btnBase = 'border-radius:14px;padding:20px;font-size:1.6rem;font-weight:600;cursor:pointer;border:1px solid var(--border);';
+  function makeBtn(k) {
+    if (k === -1) return '<button onclick="numKeypad(-1)" style="background:var(--warm);' + btnBase + '">⌫</button>';
+    if (k === -2) return '<button onclick="checkNumber()" style="background:var(--sage);color:white;border:none;border-radius:14px;padding:20px;font-size:1.4rem;cursor:pointer;font-weight:700;">✓</button>';
+    return '<button onclick="numKeypad(' + k + ')" style="background:white;' + btnBase + '">' + k + '</button>';
+  }
+  const keys = [1,2,3,4,5,6,7,8,9,-1,0,-2];
+  document.getElementById('game-area').innerHTML =
+    '<div class="number-display" style="margin-bottom:16px;">' +
+      '<div style="color:rgba(250,247,242,0.5);font-size:0.85rem;margin-bottom:12px;">Round ' + (numRound+1) + ' of ' + numRounds + ' — What was the number?</div>' +
+      '<div id="num-display" class="number-sequence" style="min-height:2.6rem;">&nbsp;</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:0 auto;">' +
+    keys.map(makeBtn).join('') + '</div>';
+  document.getElementById('game-action-area').innerHTML = '';
+}
+
+let numPadValue = '';
+function numKeypad(val) {
+  if (val === -1) {
+    numPadValue = numPadValue.slice(0, -1);
+  } else {
+    if (numPadValue.length >= 9) return;
+    numPadValue += String(val);
+  }
+  const disp = document.getElementById('num-display');
+  if (disp) disp.textContent = numPadValue || ' ';
+}
+
+function checkNumber() {
+  const answer = numPadValue;
+  numPadValue = '';
+  const correct = answer === numSequence;
+  const dispEl = document.getElementById('num-display');
+  if (correct) {
+    numCorrect++;
+    numLength = Math.min(numLength + 1, 8);
+    if (dispEl) { dispEl.textContent = answer; dispEl.style.color = 'var(--success)'; }
+    playMatch();
+  } else {
+    playError();
+    numLength = Math.max(3, numLength - 1);
+    if (dispEl) {
+      dispEl.textContent = '✗ ' + numSequence;
+      dispEl.style.color = 'var(--danger)';
+    }
+  }
+  // Disable submit, wait then move to next round
+  document.getElementById('game-action-area').innerHTML = '';
+  numRound++;
+  if (numRound >= numRounds) setTimeout(playComplete, 400);
+  setTimeout(() => renderNumberRound(), 1600);
+}
+
+function finishNumber() {
+  const t = stopTimer();
+  const score = Math.round((numCorrect/numRounds)*100);
+  gameScores.number = { score, correct: numCorrect, total: numRounds, time:t, maxLength: numLength };
+  document.getElementById('game-area').innerHTML = '';
+  document.getElementById('game-action-area').innerHTML = `
+    <div class="score-badge">✅ ${numCorrect}/${numRounds} sequences recalled</div><br/>
+    <button class="btn-game" onclick="showHub()">← Back to Activities</button>`;
+}
+
+
+// ========================================
+// GAME 5: REACTION TIME
+// ========================================
+let reactionRound = 0, reactionTimes = [], reactionWaitTimeout = null, reactionStart = null, reactionLocked = false;
+const reactionRounds = 6;
+
+function initReaction() {
+  document.getElementById('game-instructions-text').textContent = translations[currentLang]['instr-reaction'] || 'Wait for the button to turn green, then tap it as fast as you can!';
+  reactionRound = 0; reactionTimes = []; reactionLocked = false;
+  renderReactionWait();
+}
+
+function renderReactionWait() {
+  if (reactionRound >= reactionRounds) { finishReaction(); return; }
+  reactionLocked = false;
+  clearTimeout(reactionWaitTimeout);
+  reactionStart = null;
+  const rt = translations[currentLang];
+  document.getElementById('game-area').innerHTML = `
+    <div class="reaction-area">
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:28px;">${rt['react-round']} ${reactionRound+1} ${rt['react-of']} ${reactionRounds} — ${rt['react-get-ready']}</p>
+      <button class="reaction-btn waiting" id="react-btn" onclick="reactionTap()">⏳</button>
+      <p id="react-status" style="color:var(--muted);font-size:0.85rem;margin-top:24px;">${rt['react-wait']}</p>
+    </div>`;
+  document.getElementById('game-action-area').innerHTML = '';
+  // Random delay 1.5s – 4s
+  const delay = 1500 + Math.random() * 2500;
+  reactionWaitTimeout = setTimeout(() => {
+    reactionStart = performance.now();
+    const btn = document.getElementById('react-btn');
+    if (btn) {
+      playReactionReady();
+      btn.className = 'reaction-btn ready';
+      btn.textContent = '👆';
+      const statusEl = document.getElementById('react-status'); if(statusEl) statusEl.textContent = translations[currentLang]['react-tap-now'];
+    }
+  }, delay);
+}
+
+function reactionTap() {
+  if (reactionLocked) return;
+  const btn = document.getElementById('react-btn');
+  if (!btn) return;
+  if (!reactionStart) {
+    // Too soon
+    clearTimeout(reactionWaitTimeout);
+    btn.className = 'reaction-btn too-soon';
+    btn.textContent = '✋';
+    const sEl = document.getElementById('react-status'); if(sEl) sEl.textContent = translations[currentLang]['react-too-soon'];
+    // Penalise with a long fake time
+    playError();
+    reactionLocked = true;
+    reactionTimes.push(1200);
+    reactionRound++;
+    const _sidTs = gameSessionId;
+    setTimeout(() => { if (gameSessionId !== _sidTs) return; reactionLocked = false; renderReactionWait(); }, 1500);
+    return;
+  }
+  const elapsed = Math.round(performance.now() - reactionStart);
+  if (elapsed < 400) playMatch(); else playTick();
+  reactionStart = null;
+  reactionLocked = true;
+  reactionTimes.push(elapsed);
+  reactionRound++;
+  const _sidRt = gameSessionId;
+  btn.className = 'reaction-btn waiting';
+  btn.textContent = elapsed < 400 ? '🎉' : elapsed < 700 ? '👍' : '🐢';
+  btn.style.background = 'white';
+  btn.style.fontSize = '3.5rem';
+  const sEl2 = document.getElementById('react-status'); if(sEl2) sEl2.textContent = `${elapsed}ms`;
+  setTimeout(() => { if (gameSessionId !== _sidRt) return; reactionLocked = false; renderReactionWait(); }, 1200);
+}
+
+function finishReaction() {
+  const t = stopTimer();
+  const valid = reactionTimes.filter(x => x < 1200);
+  const avg = valid.length ? Math.round(valid.reduce((a,b)=>a+b,0)/valid.length) : 999;
+  const best = valid.length ? Math.min(...valid) : 999;
+  // Score: avg ≤250ms=100, avg ≥900ms=0
+  const score = Math.max(0, Math.min(100, Math.round(100 - ((avg-250)/6.5))));
+  gameScores.reaction = { score, avg, best, times: reactionTimes, time: t };
+  document.getElementById('game-area').innerHTML = `
+    <div class="reaction-area">
+      <div class="reaction-results-grid">
+        <div class="reaction-chip"><div class="rc-val">${avg}ms</div><div class="rc-lbl">Avg Response</div></div>
+        <div class="reaction-chip"><div class="rc-val">${best}ms</div><div class="rc-lbl">Best</div></div>
+        <div class="reaction-chip"><div class="rc-val">${score}%</div><div class="rc-lbl">Score</div></div>
+      </div>
+    </div>`;
+  document.getElementById('game-action-area').innerHTML = `
+    <button class="btn-game" onclick="showHub()">${translations[currentLang]['back-to-hub']}</button>`;
+}
+
+// ========== GAME EXIT ==========
+function exitGame() {
+  const bar = document.getElementById('exit-confirm');
+  if (bar) { bar.style.display = bar.style.display === 'flex' ? 'none' : 'flex'; }
+}
+
+function confirmExitGame() {
+  gameSessionId++; // invalidate all pending game timeouts
+  stopTimer();
+  clearTimeout(reactionWaitTimeout);
+  reactionStart = null;
+  reactionLocked = false;
+  patternLocked = false;
+  clearInterval(wordStudyTimer);
+  // Hide confirm bar and go back to hub
+  const bar = document.getElementById('exit-confirm');
+  if (bar) bar.style.display = 'none';
+  updatePatientHome();
+  showScreen('patient-home');
+  switchTab('assess');
+}
+
+function cancelExitGame() {
+  const bar = document.getElementById('exit-confirm');
+  if (bar) bar.style.display = 'none';
+}
+
+// ========== HUB RETURN ==========
+function showHub() {
+  stopTimer();
+  updateHub();
+  updatePatientHome();
+  showScreen('patient-home');
+  switchTab('assess');
+}
+
+// ========================================
+// RESULTS
+// ========================================
+function showResults() {
+  const scores = Object.values(gameScores).map(g=>g.score);
+  const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  const totalTime = Object.values(gameScores).reduce((a,g)=>a+g.time,0);
+  document.getElementById('results-patient-line').textContent = `${patient.name} · Age ${patient.age} · ${patient.gender}`;
+
+  // Summary cards
+  const risk = avg >= 75 ? 'Low' : avg >= 50 ? 'Moderate' : 'High';
+  const riskColor = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+  document.getElementById('results-summary').innerHTML = `
+    <div class="summary-card"><div class="label">Overall Score</div><div class="value" style="color:${riskColor}">${avg}%</div><div class="sub">Out of 100</div></div>
+    <div class="summary-card"><div class="label">Risk Indicator</div><div class="value" style="color:${riskColor};font-size:1.3rem;">${risk}</div><div class="sub">Cognitive concern</div></div>
+    <div class="summary-card"><div class="label">Total Time</div><div class="value" style="font-size:1.5rem;">${Math.floor(totalTime/60)}m ${totalTime%60}s</div><div class="sub">Session duration</div></div>
+    <div class="summary-card"><div class="label">Games Done</div><div class="value">${scores.length}/4</div><div class="sub">Activities completed</div></div>`;
+
+  // Breakdown
+  const names = {memory:'Memory Match', word:'Word Recall', pattern:'Pattern Recognition', number:'Number Memory', reaction:'Reaction Time'};
+  const icons = {memory:'🃏', word:'📝', pattern:'🔷', number:'🔢', reaction:'⚡'};
+  document.getElementById('results-breakdown').innerHTML = Object.entries(gameScores).map(([k,v])=>{
+    const cls = v.score >= 75 ? 'score-high' : v.score >= 50 ? 'score-mid' : 'score-low';
+    const timeStr = `${Math.floor(v.time/60)}m ${v.time%60}s`;
+    return `<div class="result-row">
+      <div><div class="rname">${icons[k]} ${names[k]}</div></div>
+      <div class="rscore ${cls}">${v.score}%</div>
+      <div class="rtime">⏱ ${timeStr}</div>
+    </div>`;
+  }).join('');
+
+  // Save to log
+  const entry = { date: new Date().toISOString(), patient: {...patient}, scores: gameScores, avg };
+  sessionLog.push(entry);
+  try { localStorage.setItem('mindcheck_log', JSON.stringify(sessionLog)); } catch(e){}
+
+  showScreen('results');
+}
+
+function compareRow(label, val, max, color) {
+  const pct = Math.round((val/max)*100);
+  return `<div class="compare-row">
+    <div class="compare-label">${label}</div>
+    <div class="compare-bar-wrap"><div class="compare-bar" style="width:${Math.min(100,pct)}%;background:${color}"></div></div>
+    <div class="compare-val">${Math.round(val)}</div>
+  </div>`;
+}
+
+function avg2(arr, key) {
+  const vals = arr.map(r=>parseFloat(r[key])).filter(v=>!isNaN(v));
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+}
+
+
+function resetAndRestart() {
+  gameScores = {};
+  showScreen('welcome');
+}
+
+// ========== DATA VIEWER ==========
+function renderDataView() {
+  if (!csvData.length) return;
+  const demented = csvData.filter(r=>r['Group']==='Demented').length;
+  const nonDem = csvData.filter(r=>r['Group']==='Nondemented').length;
+  const converted = csvData.filter(r=>r['Group']==='Converted').length;
+  document.getElementById('data-stats').innerHTML = `
+    <div class="data-stat"><div class="dl">Total Records</div><div class="dv">${csvData.length}</div></div>
+    <div class="data-stat"><div class="dl">Demented</div><div class="dv" style="color:var(--danger)">${demented}</div></div>
+    <div class="data-stat"><div class="dl">Non-Demented</div><div class="dv" style="color:var(--success)">${nonDem}</div></div>
+    <div class="data-stat"><div class="dl">Converted</div><div class="dv" style="color:var(--gold)">${converted}</div></div>`;
+
+  const headers = Object.keys(csvData[0]);
+  const rows = csvData.slice(0,50);
+  document.getElementById('data-table-wrap').innerHTML = `
+    <div style="overflow-x:auto;border-radius:16px;border:1px solid var(--border)">
+    <table>
+      <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r=>`<tr>${headers.map(h=>{
+        if(h==='Group') {
+          const cls = r[h]==='Demented'?'badge-dem':r[h]==='Nondemented'?'badge-non':'badge-con';
+          return `<td><span class="badge ${cls}">${r[h]}</span></td>`;
+        }
+        return `<td>${r[h]||'—'}</td>`;
+      }).join('')}</tr>`).join('')}</tbody>
+    </table>
+    <div style="padding:12px 16px;color:var(--muted);font-size:0.8rem;">Showing first 50 of ${csvData.length} records</div>
+    </div>`;
+}
+
+// ========== UTILS ==========
+function shuffle(arr) { return arr.sort(()=>Math.random()-0.5); }
+
+// ========== I18N ==========
+const translations = {
+  en: {
+    tag: 'Cognitive Screening Tool',
+    motto: 'Remembering who you are, one moment at a time.',
+    desc: 'A gentle, game-based assessment designed to detect early signs of cognitive change in seniors — through play, not pressure.',
+    'game-memory': 'Memory Matching',
+    'game-pattern': 'Pattern Recognition',
+    'game-number': 'Number Memory',
+    begin: 'Begin →',
+    dataset: 'View Dataset',
+    'setup-title': 'Patient Setup',
+    'setup-sub': 'Enter a few details before we begin the assessment.',
+    'lbl-name': 'Name',
+    'lbl-age': 'Age',
+    'lbl-gender': 'Gender',
+    start: 'Start Assessment →',
+    back: '← Back',
+    'gender-select': 'Select...',
+    'gender-male': 'Male',
+    'gender-female': 'Female',
+    'gender-other': 'Other / Prefer not to say',
+    'hub-title': '🧠 Project Memento',
+    'hub-intro-h': 'Choose your next activity',
+    'hub-intro-p': 'Complete all four activities to generate your assessment report.',
+    'hub-finish': 'View Results →',
+    'hub-exit': 'Exit',
+    'game-reaction': 'Reaction Time',
+    'game-mem-name': 'Memory Match',
+    'game-mem-desc': 'Flip cards and find matching pairs as quickly as you can.',
+    'game-mem-dur': '⏱ ~3 minutes',
+    'game-pat-name': 'Pattern Recognition',
+    'game-pat-desc': 'Spot which pattern comes next in a sequence.',
+    'game-pat-dur': '⏱ ~3 minutes',
+    'game-num-name': 'Number Memory',
+    'game-num-desc': 'See a number sequence, then type it back in order.',
+    'game-num-dur': '⏱ ~2 minutes',
+    'game-react-desc': 'Tap the button as fast as you can when it lights up.',
+    'game-react-dur': '⏱ ~2 minutes',
+    'res-title': 'Assessment Complete',
+    'res-new': 'New Assessment',
+    'res-view': 'View Dataset',
+    'data-title': 'Dataset Viewer',
+    'instr-reaction': 'Wait for the button to turn green, then tap it as fast as you can!',
+    'react-get-ready': 'Get ready…',
+    'react-wait': 'Wait for it to turn green…',
+    'react-tap-now': 'TAP NOW!',
+    'react-too-soon': 'Too soon! Wait for green.',
+    'react-round': 'Round',
+    'react-of': 'of',
+    'instr-memory': 'Flip cards two at a time to find matching pairs. Remember where each card is!',
+    'instr-pattern': 'Look at the highlighted pattern and find the correct matching option below.',
+    'instr-number': 'A number sequence will appear briefly. Type it back exactly as shown.',
+    'back-to-hub': '← Back to Activities',
+    'complete-in': 'Complete in',
+    'ex-breathing': 'Breathing Exercise',
+    'ex-breathing-desc': 'A calming box breathing session to reduce stress.',
+    'ex-coming-soon': 'Coming soon',
+    'ex-music': 'Gentle Music',
+    'ex-music-desc': 'Coming soon — calming music to accompany your session.',
+    'ex-hand': 'Hand Exercises',
+    'ex-hand-desc': 'Coming soon — simple guided hand and finger movements.',
+    'tab-assess': '🧠 Assessment',
+    'tab-exercise': '🧘 Exercises',
+    'assess-sub': 'Complete all four games to generate a cognitive assessment report.',
+    'exercise-sub': 'Gentle activities to help you relax and feel good.',
+    'breath-title': 'Box Breathing',
+    'breath-sub': 'Breathe in sync with the circle. This helps calm your mind and body.',
+    'breath-ready': 'Ready',
+    'breath-press': 'Press start when ready',
+    'breath-in': 'Breathe in…',
+    'breath-hold': 'Hold…',
+    'breath-out': 'Breathe out…',
+    'breath-round': 'Round',
+    'breath-of': 'of',
+    'breath-done-label': 'Well done!',
+    'breath-done-sub': 'You completed your breathing session 🌿',
+    'ph-greeting': 'Hello',
+    'ph-subtitle': 'What would you like to do today?',
+    'memo-name': 'Memo',
+    'memo-sub': 'Your friendly companion',
+    'home-ex-label': '🧘 Exercises',
+    'home-breathing': 'Breathing',
+    'home-games-label': '🧠 Assessment Games',
+  },
+  zh: {
+    tag: '认知筛查工具',
+    motto: '一次一刻，记住您是谁。',
+    desc: '一项温和的、以游戏为基础的评估工具，通过趣味活动帮助发现老年人认知变化的早期迹象。',
+    'game-memory': '记忆配对',
+    'game-pattern': '图案识别',
+    'game-number': '数字记忆',
+    begin: '开始 →',
+    dataset: '查看数据集',
+    'setup-title': '患者信息',
+    'setup-sub': '请在开始评估前填写以下基本信息。',
+    'lbl-name': '姓名',
+    'lbl-age': '年龄',
+    'lbl-gender': '性别',
+    start: '开始评估 →',
+    back: '← 返回',
+    'gender-select': '请选择...',
+    'gender-male': '男',
+    'gender-female': '女',
+    'gender-other': '其他 / 不愿透露',
+    'hub-title': '🧠 记忆项目',
+    'hub-intro-h': '选择下一个活动',
+    'hub-intro-p': '完成全部四项活动以生成评估报告。',
+    'hub-finish': '查看结果 →',
+    'hub-exit': '退出',
+    'game-mem-name': '记忆配对',
+    'game-reaction': '反应时间',
+    'game-react-desc': '按钮亮起时，尽快点击它。',
+    'game-react-dur': '⏱ 约2分钟',
+    'game-mem-desc': '翻牌并尽快找到匹配的卡片对。',
+    'game-mem-dur': '⏱ 约3分钟',
+    'game-pat-name': '图案识别',
+    'game-pat-desc': '找出序列中的下一个图案。',
+    'game-pat-dur': '⏱ 约3分钟',
+    'game-num-name': '数字记忆',
+    'game-num-desc': '看一组数字序列，然后按顺序输入。',
+    'game-num-dur': '⏱ 约2分钟',
+    'res-title': '评估完成',
+    'res-new': '新的评估',
+    'res-view': '查看数据集',
+    'data-title': '数据集查看器',
+    'instr-reaction': '等按钮变绿后，尽快点击它！',
+    'react-get-ready': '准备好了…',
+    'react-wait': '等待按钮变绿…',
+    'react-tap-now': '立即点击！',
+    'react-too-soon': '太早了！请等待绿色。',
+    'react-round': '第',
+    'react-of': '轮，共',
+    'instr-memory': '每次翻两张牌，找到匹配的对子。记住每张牌的位置！',
+    'instr-pattern': '观察高亮图案，从下方选项中找到正确的匹配项。',
+    'instr-number': '数字序列将短暂显示，请按顺序将其输入回来。',
+    'back-to-hub': '← 返回活动',
+    'complete-in': '完成时间',
+    'ex-breathing': '呼吸练习',
+    'ex-breathing-desc': '平静的箱式呼吸练习，减轻压力。',
+    'ex-coming-soon': '即将推出',
+    'ex-music': '轻柔音乐',
+    'ex-music-desc': '即将推出 — 陪伴您的舒缓音乐。',
+    'ex-hand': '手部练习',
+    'ex-hand-desc': '即将推出 — 简单的手部和手指引导动作。',
+    'tab-assess': '🧠 认知评估',
+    'tab-exercise': '🧘 练习',
+    'assess-sub': '完成全部四项游戏以生成认知评估报告。',
+    'exercise-sub': '帮助您放松身心的温和活动。',
+    'breath-title': '箱式呼吸',
+    'breath-sub': '跟随圆圈节奏呼吸，帮助平静身心。',
+    'breath-ready': '准备好了',
+    'breath-press': '准备好后按开始',
+    'breath-in': '吸气…',
+    'breath-hold': '屏住…',
+    'breath-out': '呼气…',
+    'breath-round': '第',
+    'breath-of': '轮，共',
+    'breath-done-label': '做得很好！',
+    'breath-done-sub': '您已完成呼吸练习 🌿',
+    'ph-greeting': '你好',
+    'ph-subtitle': '今天想做什么？',
+    'memo-name': 'Memo',
+    'memo-sub': '您的贴心伙伴',
+    'home-ex-label': '🧘 练习',
+    'home-breathing': '呼吸练习',
+    'home-games-label': '🧠 认知游戏',
+  },
+  ms: {
+    tag: 'Alat Saringan Kognitif',
+    motto: 'Mengingati siapa anda, satu saat dalam satu masa.',
+    desc: 'Penilaian berasaskan permainan yang lembut untuk mengesan tanda-tanda awal perubahan kognitif dalam kalangan warga emas — melalui permainan, bukan tekanan.',
+    'game-memory': 'Padanan Memori',
+    'game-pattern': 'Pengecaman Corak',
+    'game-number': 'Memori Nombor',
+    begin: 'Mula →',
+    dataset: 'Lihat Set Data',
+    'setup-title': 'Maklumat Pesakit',
+    'setup-sub': 'Masukkan beberapa maklumat sebelum kami memulakan penilaian.',
+    'lbl-name': 'Nama',
+    'lbl-age': 'Umur',
+    'lbl-gender': 'Jantina',
+    start: 'Mula Penilaian →',
+    back: '← Kembali',
+    'gender-select': 'Pilih...',
+    'gender-male': 'Lelaki',
+    'gender-female': 'Perempuan',
+    'gender-other': 'Lain-lain / Tidak mahu nyatakan',
+    'hub-title': '🧠 Projek Memento',
+    'hub-intro-h': 'Pilih aktiviti seterusnya',
+    'hub-intro-p': 'Lengkapkan keempat-empat aktiviti untuk menjana laporan penilaian anda.',
+    'hub-finish': 'Lihat Keputusan →',
+    'hub-exit': 'Keluar',
+    'game-mem-name': 'Padanan Memori',
+    'game-reaction': 'Masa Tindak Balas',
+    'game-react-desc': 'Ketik butang secepat mungkin apabila ia menyala.',
+    'game-react-dur': '⏱ ~2 minit',
+    'game-mem-desc': 'Balikkan kad dan cari pasangan yang sepadan secepat mungkin.',
+    'game-mem-dur': '⏱ ~3 minit',
+    'game-pat-name': 'Pengecaman Corak',
+    'game-pat-desc': 'Kenal pasti corak seterusnya dalam urutan.',
+    'game-pat-dur': '⏱ ~3 minit',
+    'game-num-name': 'Memori Nombor',
+    'game-num-desc': 'Lihat urutan nombor, kemudian taip semula mengikut turutan.',
+    'game-num-dur': '⏱ ~2 minit',
+    'res-title': 'Penilaian Selesai',
+    'res-new': 'Penilaian Baharu',
+    'res-view': 'Lihat Set Data',
+    'data-title': 'Pemapar Set Data',
+    'instr-reaction': 'Tunggu butang bertukar hijau, kemudian ketik secepat mungkin!',
+    'react-get-ready': 'Bersedia…',
+    'react-wait': 'Tunggu sehingga ia bertukar hijau…',
+    'react-tap-now': 'KETIK SEKARANG!',
+    'react-too-soon': 'Terlalu awal! Tunggu warna hijau.',
+    'react-round': 'Pusingan',
+    'react-of': 'daripada',
+    'instr-memory': 'Balikkan dua kad pada satu masa untuk mencari pasangan yang sepadan. Ingat di mana setiap kad berada!',
+    'instr-pattern': 'Lihat corak yang diserlahkan dan cari pilihan padanan yang betul di bawah.',
+    'instr-number': 'Urutan nombor akan dipaparkan sebentar. Taip semula dengan tepat seperti yang ditunjukkan.',
+    'back-to-hub': '← Kembali ke Aktiviti',
+    'complete-in': 'Selesai dalam',
+    'ex-breathing': 'Senaman Pernafasan',
+    'ex-breathing-desc': 'Sesi pernafasan kotak yang menenangkan untuk mengurangkan tekanan.',
+    'ex-coming-soon': 'Akan datang',
+    'ex-music': 'Muzik Lembut',
+    'ex-music-desc': 'Akan datang — muzik yang menenangkan.',
+    'ex-hand': 'Senaman Tangan',
+    'ex-hand-desc': 'Akan datang — gerakan tangan dan jari yang dipandu.',
+    'tab-assess': '🧠 Penilaian',
+    'tab-exercise': '🧘 Senaman',
+    'assess-sub': 'Lengkapkan keempat-empat permainan untuk menjana laporan penilaian kognitif.',
+    'exercise-sub': 'Aktiviti lembut untuk membantu anda berehat.',
+    'breath-title': 'Pernafasan Kotak',
+    'breath-sub': 'Bernafas mengikut bulatan. Ini membantu menenangkan minda dan badan.',
+    'breath-ready': 'Bersedia',
+    'breath-press': 'Tekan mula apabila bersedia',
+    'breath-in': 'Tarik nafas…',
+    'breath-hold': 'Tahan…',
+    'breath-out': 'Hembus nafas…',
+    'breath-round': 'Pusingan',
+    'breath-of': 'daripada',
+    'breath-done-label': 'Syabas!',
+    'breath-done-sub': 'Anda telah melengkapkan sesi pernafasan 🌿',
+    'ph-greeting': 'Helo',
+    'ph-subtitle': 'Apa yang anda ingin lakukan hari ini?',
+    'memo-name': 'Memo',
+    'memo-sub': 'Teman mesra anda',
+    'home-ex-label': '🧘 Senaman',
+    'home-breathing': 'Pernafasan',
+    'home-games-label': '🧠 Permainan Penilaian',
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+  const setId = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  // Lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+  // Welcome
+  setId('t-tag', t.tag);
+  setId('t-motto', t.motto);
+  setId('t-desc', t.desc);
+  setId('t-begin', t.begin);
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (t[key]) el.textContent = t[key];
+  });
+
+  // Setup
+  setId('t-setup-title', t['setup-title']);
+  setId('t-setup-sub', t['setup-sub']);
+  setId('t-lbl-name', t['lbl-name']);
+  setId('t-lbl-age', t['lbl-age']);
+  setId('t-lbl-gender', t['lbl-gender']);
+  setId('t-start', t.start);
+  setId('t-back-setup', t.back);
+  const gsel = document.getElementById('patient-gender');
+  if (gsel) {
+    gsel.options[0].text = t['gender-select'];
+    gsel.options[1].text = t['gender-male'];
+    gsel.options[2].text = t['gender-female'];
+    gsel.options[3].text = t['gender-other'];
+  }
+
+  // Hub
+  setId('t-hub-title', t['hub-title']);
+  setId('t-hub-intro-h', t['hub-intro-h']);
+  setId('t-hub-intro-p', t['hub-intro-p']);
+  setId('t-gc-mem-name', t['game-mem-name']);
+  setId('t-gc-mem-desc', t['game-mem-desc']);
+  setId('t-gc-mem-dur', t['game-mem-dur']);
+  setId('t-gc-pat-name', t['game-pat-name']);
+  setId('t-gc-pat-desc', t['game-pat-desc']);
+  setId('t-gc-pat-dur', t['game-pat-dur']);
+  setId('t-gc-num-name', t['game-num-name']);
+  setId('t-gc-num-desc', t['game-num-desc']);
+  setId('t-gc-num-dur', t['game-num-dur']);
+  setId('t-gc-react-name', t['game-reaction'] || 'Reaction Time');
+  setId('t-gc-react-desc', t['game-react-desc'] || 'Tap the button as fast as you can when it lights up.');
+  setId('t-gc-react-dur',  t['game-react-dur']  || '⏱ ~2 minutes');
+  const finBtn = document.getElementById('finish-btn');
+  if (finBtn) { const sp = finBtn.querySelector('span'); if(sp) sp.textContent = t['hub-finish']; }
+
+  // Results
+  setId('t-res-title', t['res-title']);
+  setId('t-res-new', t['res-new']);
+
+  // Data
+  setId('t-data-title', t['data-title']);
+  // Patient home tabs
+  setId('t-tab-assess',   t['tab-assess']   || '🧠 Assessment');
+  setId('t-tab-exercise', t['tab-exercise'] || '🧘 Exercises');
+  setId('t-assess-sub',   t['assess-sub']   || 'Complete all four games to generate a cognitive assessment report.');
+  setId('t-exercise-sub', t['exercise-sub'] || 'Gentle activities to help you relax and feel good.');
+
+  // Exercise cards
+  setId('t-ex-breathing',      t['ex-breathing']      || 'Breathing Exercise');
+  setId('t-ex-breathing-desc', t['ex-breathing-desc'] || 'A calming box breathing session.');
+  setId('t-ex-music',          t['ex-music']          || 'Gentle Music');
+  setId('t-ex-music-desc',     t['ex-music-desc']     || 'Coming soon.');
+  setId('t-ex-hand',           t['ex-hand']           || 'Hand Exercises');
+  setId('t-ex-hand-desc',      t['ex-hand-desc']      || 'Coming soon.');
+  document.querySelectorAll('[data-t="ex-coming-soon"]').forEach(el => el.textContent = t['ex-coming-soon'] || 'Coming soon');
+
+  // Breathing screen
+  setId('t-breath-title', t['breath-title'] || 'Box Breathing');
+  setId('t-breath-sub',   t['breath-sub']   || 'Breathe in sync with the circle.');
+
+  // Memo chatbot header
+  setId('t-memo-name', t['memo-name'] || 'Memo');
+  setId('t-memo-sub',  t['memo-sub']  || 'Your friendly companion');
+  setId('t-home-games-label', t['home-games-label'] || '🧠 Assessment Games');
+  setId('t-home-ex-label',    t['home-ex-label']    || '🧘 Exercises');
+  setId('t-home-breathing',   t['home-breathing']   || 'Breathing');
+}
+
+
+// ========== CAREGIVER DASHBOARD ==========
+const DASHBOARD_PIN = '1234';
+
+function openDashboard() {
+  document.getElementById('dash-pin-wrap').style.display = 'block';
+  document.getElementById('dash-main').style.display = 'none';
+  document.getElementById('pin-input').value = '';
+  showScreen('dashboard');
+}
+
+function checkPin() {
+  const val = document.getElementById('pin-input').value.trim();
+  if (val === DASHBOARD_PIN) {
+    document.getElementById('dash-pin-wrap').style.display = 'none';
+    document.getElementById('dash-main').style.display = 'block';
+    renderDashboard();
+  } else {
+    const inp = document.getElementById('pin-input');
+    inp.style.borderColor = 'var(--danger)';
+    inp.value = '';
+    inp.placeholder = 'Wrong PIN';
+    setTimeout(() => { inp.style.borderColor = ''; inp.placeholder = '····'; }, 1500);
+  }
+}
+
+function deleteSession(idx) {
+  const card = document.getElementById(`sc-${idx}`);
+  if (!card) return;
+  // Show inline confirm
+  card.style.outline = '2px solid var(--danger)';
+  const existing = card.querySelector('.del-confirm');
+  if (existing) { existing.remove(); card.style.outline=''; return; }
+  const conf = document.createElement('div');
+  conf.className = 'del-confirm';
+  conf.style.cssText = 'display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);';
+  conf.innerHTML = `<span style="font-size:0.85rem;color:var(--danger);flex:1;">Remove this session?</span>
+    <button onclick="confirmDelete(${idx})" style="background:var(--danger);color:white;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.82rem;font-weight:600;">Yes, delete</button>
+    <button onclick="cancelDelete(${idx})" style="background:var(--warm);border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.82rem;">Cancel</button>`;
+  card.appendChild(conf);
+}
+
+function confirmDelete(idx) {
+  const log = JSON.parse(localStorage.getItem('mindcheck_log') || '[]');
+  const realIdx = log.length - 1 - idx;
+  log.splice(realIdx, 1);
+  localStorage.setItem('mindcheck_log', JSON.stringify(log));
+  sessionLog = log;
+  renderDashboard();
+}
+
+function cancelDelete(idx) {
+  const card = document.getElementById(`sc-${idx}`);
+  if (!card) return;
+  card.style.outline = '';
+  const conf = card.querySelector('.del-confirm');
+  if (conf) conf.remove();
+}
+
+function renderDashboard() {
+  const log = JSON.parse(localStorage.getItem('mindcheck_log') || '[]');
+  const dashStats = document.getElementById('dash-stats');
+  const dashSessions = document.getElementById('dash-sessions');
+
+  if (!log.length) {
+    dashStats.innerHTML = '';
+    dashSessions.innerHTML = `<div class="empty-dash"><div class="ed-icon">📋</div><p>No sessions recorded yet.<br/>Complete an assessment to see results here.</p></div>`;
+    return;
+  }
+
+  // Stats
+  const avgs = log.map(e => e.avg);
+  const overallAvg = Math.round(avgs.reduce((a,b)=>a+b,0)/avgs.length);
+  const latest = log[log.length-1];
+
+  dashStats.innerHTML = `
+    <div class="dash-stat"><div class="ds-val">${log.length}</div><div class="ds-lbl">Sessions</div></div>
+    <div class="dash-stat"><div class="ds-val">${overallAvg}%</div><div class="ds-lbl">Avg Score</div></div>
+    <div class="dash-stat"><div class="ds-val">${latest.avg}%</div><div class="ds-lbl">Latest</div></div>`;
+
+  // SVG Trend Chart
+  const chartW = 560, chartH = 160, padL = 36, padR = 16, padT = 16, padB = 32;
+  const innerW = chartW - padL - padR;
+  const innerH = chartH - padT - padB;
+  const points = avgs;
+  const minV = Math.max(0, Math.min(...points) - 10);
+  const maxV = Math.min(100, Math.max(...points) + 10);
+  const range = maxV - minV || 1;
+  const toX = i => padL + (i / Math.max(points.length-1, 1)) * innerW;
+  const toY = v => padT + innerH - ((v - minV) / range) * innerH;
+
+  // Grid lines at 25, 50, 75, 100
+  const gridLines = [25,50,75,100].filter(v => v >= minV-5 && v <= maxV+5).map(v => {
+    const y = toY(v);
+    return `<line x1="${padL}" y1="${y}" x2="${chartW-padR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>
+            <text x="${padL-4}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--muted)">${v}</text>`;
+  }).join('');
+
+  // Polyline path
+  const polyPts = points.map((v,i) => `${toX(i)},${toY(v)}`).join(' ');
+  // Fill area
+  const fillPath = points.length > 1
+    ? `M${toX(0)},${toY(points[0])} ` + points.slice(1).map((v,i)=>`L${toX(i+1)},${toY(v)}`).join(' ')
+      + ` L${toX(points.length-1)},${padT+innerH} L${toX(0)},${padT+innerH} Z`
+    : '';
+
+  // Dots + labels
+  const dots = points.map((v,i) => {
+    const x = toX(i); const y = toY(v);
+    const col = v >= 75 ? 'var(--success)' : v >= 50 ? 'var(--warning)' : 'var(--danger)';
+    const label = log[i]?.patient?.name?.split(' ')[0] || `S${i+1}`;
+    return `<circle cx="${x}" cy="${y}" r="5" fill="${col}" stroke="white" stroke-width="2"/>
+            <text x="${x}" y="${padT+innerH+padB-4}" text-anchor="middle" font-size="9" fill="var(--muted)">${label}</text>`;
+  }).join('');
+
+  const chartSVG = `
+    <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px;overflow:hidden;">
+      <div style="font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:12px;">Overall Score Trend</div>
+      <svg viewBox="0 0 ${chartW} ${chartH}" style="width:100%;height:auto;overflow:visible;">
+        ${gridLines}
+        ${fillPath ? `<path d="${fillPath}" fill="rgba(122,158,135,0.12)"/>` : ''}
+        ${points.length > 1 ? `<polyline points="${polyPts}" fill="none" stroke="var(--sage)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${dots}
+      </svg>
+    </div>`;
+
+  document.getElementById('dash-chart').innerHTML = chartSVG;
+
+  // Sessions list (newest first) with delete button
+  const gameNames = { memory:'Memory', pattern:'Pattern', number:'Number', reaction:'Reaction' };
+  const gameIcons = { memory:'🃏', pattern:'🔷', number:'🔢', reaction:'⚡' };
+  dashSessions.innerHTML = [...log].reverse().map((entry, i) => {
+    const date = new Date(entry.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const scoreChips = Object.entries(entry.scores).map(([k,v]) =>
+      `<span class="sc-tag">${gameIcons[k]||''} ${gameNames[k]||k}: ${v.score}%</span>`
+    ).join('');
+    const riskColor = entry.avg >= 75 ? 'var(--success)' : entry.avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+    return `<div class="session-card" id="sc-${i}">
+      <div class="sc-top">
+        <div>
+          <div class="sc-name">${entry.patient?.name || 'Unknown'}</div>
+          <div class="sc-date">Age ${entry.patient?.age || '?'} · ${entry.patient?.gender || ''} · ${date}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:${riskColor};">${entry.avg}%</div>
+          <button onclick="deleteSession(${i})" title="Delete" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;font-size:0.8rem;color:var(--muted);">🗑</button>
+        </div>
+      </div>
+      <div class="sc-scores">${scoreChips}</div>
+    </div>`;
+  }).join('');
+}
+
+
+// ========== AUDIO CUES ==========
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type='sine', vol=0.18, delay=0) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.05);
+  } catch(e) {}
+}
+
+function playSuccess() {
+  playTone(523, 0.12); playTone(659, 0.12, 'sine', 0.18, 0.13); playTone(784, 0.2, 'sine', 0.18, 0.26);
+}
+function playError() {
+  playTone(220, 0.25, 'sawtooth', 0.12);
+}
+function playFlip() {
+  playTone(440, 0.08, 'sine', 0.1);
+}
+function playMatch() {
+  playTone(660, 0.1); playTone(880, 0.15, 'sine', 0.15, 0.11);
+}
+function playReactionReady() {
+  playTone(880, 0.15, 'sine', 0.2);
+}
+function playTick() {
+  playTone(1000, 0.04, 'square', 0.06);
+}
+function playComplete() {
+  [523,659,784,1047].forEach((f,i) => playTone(f, 0.18, 'sine', 0.16, i*0.15));
+}
+
+// ========== CHATBOT (Claude API) ==========
+let chatOpen = false;
+let chatGreeted = false;
+let chatApiHistory = []; // {role, content} for Claude API
+let chatIsBusy = false;
+
+function getMemoSystemPrompt() {
+  const lang = currentLang;
+  const langName = lang === 'zh' ? 'Simplified Chinese' : lang === 'ms' ? 'Malay (Bahasa Melayu)' : 'English';
+  const name = patient?.name && patient.name !== 'Friend' ? patient.name : null;
+  return `You are Memo, a warm, gentle, and patient companion chatbot for elderly users in a dementia cognitive assessment app called Project Memento. Your role is to be a friendly conversational companion — not a medical advisor.
+
+KEY RULES:
+- Always respond in ${langName}. Never switch languages unless the user does.
+- Keep responses SHORT (2-4 sentences max). Elderly users prefer brief, clear messages.
+- Be warm, encouraging, and patient. Use simple vocabulary. Avoid jargon.
+- You can chat about everyday topics: family, food, weather, hobbies, memories, feelings.
+- If asked about the app, explain there are 4 games (Memory Match, Pattern Recognition, Number Memory, Reaction Time) and a Breathing Exercise.
+- If the user seems sad, lonely, or distressed, be compassionate and gently suggest the breathing exercise or talking to a loved one.
+- Never diagnose, give medical advice, or comment on their cognitive scores.
+- Use occasional gentle emojis (😊 🌸 💙) but don't overdo it.
+- If asked who you are: "I'm Memo, your friendly companion in Project Memento! 😊"
+${name ? `- The user's name is ${name}. Use it warmly occasionally.` : ''}`;
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chat-panel');
+  const fab   = document.getElementById('chat-fab');
+  panel.classList.toggle('open', chatOpen);
+  fab.textContent = chatOpen ? '✕' : '💬';
+  if (chatOpen && !chatGreeted) {
+    chatGreeted = true;
+    const firstName = patient?.name && patient.name !== 'Friend' ? ', ' + patient.name.split(' ')[0] : '';
+    const greetings = {
+      en: `Hello${firstName}! 😊 I'm Memo, your friendly companion. How are you feeling today?`,
+      zh: `你好${firstName}！😊 我是Memo，您的贴心伙伴。今天感觉怎么样？`,
+      ms: `Helo${firstName}! 😊 Saya Memo, teman mesra anda. Bagaimana perasaan anda hari ini?`
+    };
+    setTimeout(() => addBotMsgDirect(greetings[currentLang] || greetings.en), 400);
+  }
+}
+
+function addBotMsgDirect(text) {
+  const msgs = document.getElementById('chat-messages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg bot';
+  msg.textContent = text;
+  msgs.appendChild(msg);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatApiHistory.push({ role: 'assistant', content: text });
+  playTick();
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'chat-typing'; el.id = 'chat-typing'; el.textContent = '● ● ●';
+  msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() {
+  document.getElementById('chat-typing')?.remove();
+}
+
+function addUserMsgUI(text) {
+  const msgs = document.getElementById('chat-messages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg user';
+  msg.textContent = text;
+  msgs.appendChild(msg);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendChat() {
+  if (chatIsBusy) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addUserMsgUI(text);
+  chatApiHistory.push({ role: 'user', content: text });
+  await callMemoAPI();
+}
+
+async function callMemoAPI() {
+  chatIsBusy = true;
+  showTyping();
+  // Keep history to last 10 messages to avoid token bloat
+  const recent = chatApiHistory.slice(-10);
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        system: getMemoSystemPrompt(),
+        messages: recent
+      })
+    });
+    const data = await resp.json();
+    hideTyping();
+    const reply = data?.content?.[0]?.text || (currentLang === 'zh' ? '抱歉，我现在无法回复。请再试一次。' : currentLang === 'ms' ? 'Maaf, saya tidak dapat membalas sekarang.' : 'Sorry, I could not respond. Please try again.');
+    addBotMsgDirect(reply);
+  } catch(e) {
+    hideTyping();
+    const err = currentLang === 'zh' ? '连接出现问题，请重试。😊' : currentLang === 'ms' ? 'Ada masalah sambungan. Cuba lagi. 😊' : 'Having a little trouble connecting. Please try again. 😊';
+    addBotMsgDirect(err);
+  }
+  chatIsBusy = false;
+}
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', () => {
+  const ci = document.getElementById('chat-input');
+  if (ci) ci.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+});
+
+// ========== LARGE TEXT ==========
+let largeTextOn = false;
+function toggleLargeText() {
+  largeTextOn = !largeTextOn;
+  document.body.classList.toggle('large-text', largeTextOn);
+  const btn = document.getElementById('text-size-btn');
+  if (btn) btn.classList.toggle('active', largeTextOn);
+}
+
+// ========== PATIENT HOME ==========
+function startPatient() {
+  patient.name = document.getElementById('patient-name').value.trim() || 'Friend';
+  patient.age  = document.getElementById('patient-age').value || '?';
+  patient.gender = document.getElementById('patient-gender').value || 'Not specified';
+  gameScores = {};
+  updateHub();
+  updatePatientHome();
+  showScreen('patient-home');
+  switchTab('assess');
+}
+
+function updatePatientHome() {
+  const firstName = patient.name.split(' ')[0];
+  const tl = translations[currentLang];
+  const el = document.getElementById('ph-name');
+  if (el) el.textContent = (tl['ph-greeting']||'Hello') + ', ' + firstName + '! 👋';
+  const sub = document.getElementById('ph-sub');
+  if (sub) sub.textContent = 'Age ' + patient.age + (patient.gender && patient.gender !== 'Not specified' ? ' · ' + patient.gender : '');
+
+  // Show last assessment if any
+  const log = JSON.parse(localStorage.getItem('mindcheck_log') || '[]');
+  const mine = log.filter(e => e.patient?.name === patient.name);
+  const banner = document.getElementById('last-assess-banner');
+  if (mine.length && banner) {
+    banner.style.display = 'flex';
+    const last = mine[mine.length - 1];
+    const daysAgo = Math.floor((Date.now() - new Date(last.date)) / 86400000);
+    const timeStr = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : daysAgo + ' days ago';
+    document.getElementById('last-assess-text').textContent = timeStr + ' · ' + new Date(last.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+    const pill = document.getElementById('last-score-pill');
+    pill.textContent = last.avg + '%';
+    pill.style.background = last.avg >= 75 ? 'rgba(90,158,111,0.15)' : last.avg >= 50 ? 'rgba(212,168,83,0.15)' : 'rgba(196,68,62,0.12)';
+    pill.style.color = last.avg >= 75 ? 'var(--success)' : last.avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-assess').classList.toggle('active', tab === 'assess');
+  document.getElementById('tab-exercise').classList.toggle('active', tab === 'exercise');
+  document.getElementById('tab-assess-btn').classList.toggle('active', tab === 'assess');
+  document.getElementById('tab-exercise-btn').classList.toggle('active', tab === 'exercise');
+}
+
+// ========== BREATHING EXERCISE ==========
+let breathInterval = null, breathRound = 0, breathTotalRounds = 6;
+const breathPhases = [
+  { label: 'Breathe in…', duration: 4, class: 'expanding',  emoji: '🌬️' },
+  { label: 'Hold…',       duration: 4, class: 'hold-in',    emoji: '✨' },
+  { label: 'Breathe out…',duration: 4, class: 'shrinking',  emoji: '😌' },
+  { label: 'Hold…',       duration: 4, class: 'hold-out',   emoji: '✨' },
+];
+
+function startBreathing() {
+  breathRound = 0;
+  // Reset UI
+  document.getElementById('breath-label').textContent = translations[currentLang]['breath-ready']||'Ready';
+  document.getElementById('breath-timer').textContent = translations[currentLang]['breath-press']||'Press start when ready';
+  document.getElementById('breath-rounds').textContent = '';
+  document.getElementById('breath-start-btn').style.display = 'inline-block';
+  const ring = document.getElementById('breath-ring');
+  const dot  = document.getElementById('breath-dot');
+  ring.className = 'breath-ring';
+  dot.className  = 'breath-dot';
+  dot.textContent = '🌬️';
+  showScreen('breathing-screen');
+}
+
+function startBreathingExercise() {
+  document.getElementById('breath-start-btn').style.display = 'none';
+  breathRound = 0;
+  runBreathCycle(0);
+}
+
+function runBreathCycle(phaseIndex) {
+  if (breathRound >= breathTotalRounds * breathPhases.length) {
+    finishBreathing(); return;
+  }
+  const phase = breathPhases[phaseIndex % breathPhases.length];
+  const ring  = document.getElementById('breath-ring');
+  const dot   = document.getElementById('breath-dot');
+  const label = document.getElementById('breath-label');
+  const timer = document.getElementById('breath-timer');
+  const rounds= document.getElementById('breath-rounds');
+  if (!ring) return;
+
+  ring.className = 'breath-ring ' + phase.class;
+  dot.className  = 'breath-dot '  + phase.class;
+  dot.textContent = phase.emoji;
+  const tlang = translations[currentLang];
+  const phaseLabels = [tlang['breath-in']||phase.label, tlang['breath-hold']||phase.label, tlang['breath-out']||phase.label, tlang['breath-hold']||phase.label];
+  label.textContent = phaseLabels[phaseIndex % 4] || phase.label;
+  const completedRounds = Math.floor(breathRound / breathPhases.length);
+  const tl = translations[currentLang]; rounds.textContent = (tl['breath-round']||'Round') + ' ' + (completedRounds+1) + ' ' + (tl['breath-of']||'of') + ' ' + breathTotalRounds;
+
+  let countdown = phase.duration;
+  timer.textContent = countdown + 's';
+  playTick();
+  clearInterval(breathInterval);
+  breathInterval = setInterval(() => {
+    countdown--;
+    if (timer) timer.textContent = countdown + 's';
+    if (countdown <= 0) {
+      clearInterval(breathInterval);
+      breathRound++;
+      setTimeout(() => runBreathCycle(breathRound % breathPhases.length), 100);
+    }
+  }, 1000);
+}
+
+function finishBreathing() {
+  clearInterval(breathInterval);
+  const ring = document.getElementById('breath-ring');
+  const dot  = document.getElementById('breath-dot');
+  if (ring) ring.className = 'breath-ring';
+  if (dot)  { dot.className = 'breath-dot'; dot.textContent = '🌟'; }
+  document.getElementById('breath-label').textContent = translations[currentLang]['breath-done-label'] || 'Well done!';
+  document.getElementById('breath-timer').textContent = translations[currentLang]['breath-done-sub'] || 'You completed your breathing session 🌿';
+  document.getElementById('breath-rounds').textContent = '';
+  document.getElementById('breath-start-btn').textContent = 'Do it again →';
+  document.getElementById('breath-start-btn').style.display = 'inline-block';
+  document.getElementById('breath-start-btn').onclick = startBreathingExercise;
+  playComplete();
+}
+
+function stopBreathing() {
+  clearInterval(breathInterval);
+  breathRound = 0;
+  showScreen('patient-home');
+  switchTab('exercise');
+}
+
+// Auto-init dataset on load
+renderDataView();
+</script>
+
+<!-- ===== CAREGIVER DASHBOARD ===== -->
+<section class="screen" id="dashboard">
+  <div class="dash-header">
+    <button class="back-btn" onclick="showScreen('welcome')">←</button>
+    <h2>🔒 Caregiver Dashboard</h2>
+  </div>
+  <div class="dash-content" id="dash-content">
+    <div class="dash-pin-wrap" id="dash-pin-wrap">
+      <h3>🔒 Caregiver Access</h3>
+      <p>Enter the 4-digit PIN to view patient session history.</p>
+      <input class="pin-input" id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="····" onkeydown="if(event.key==='Enter') checkPin()"/>
+      <br/>
+      <button class="btn-primary" onclick="checkPin()" style="margin-top:8px;">Enter →</button>
+      <p style="margin-top:16px;font-size:0.78rem;color:var(--muted);">Default PIN: 1234</p>
+    </div>
+    <div id="dash-main" style="display:none;">
+      <div class="dash-stats" id="dash-stats"></div>
+      <div id="dash-chart"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--navy);">Session History</h3>
+        <button class="btn-secondary" onclick="showScreen('data-screen')" style="padding:8px 16px;font-size:0.82rem;">📊 View Dataset</button>
+      </div>
+      <div id="dash-sessions"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHATBOT ===== -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" title="Chat with Memo">💬</button>
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-avatar">🧠</div>
+    <div class="chat-header-text">
+      <h4 id="t-memo-name">Memo</h4>
+      <p id="t-memo-sub">Your friendly companion</p>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-quick-replies" id="chat-qr"></div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chat-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter') sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- ===== PATIENT HOME ===== -->
+<section class="screen" id="patient-home">
+  <div class="patient-home-header">
+    <div class="ph-left">
+      <div class="patient-avatar">👤</div>
+      <div>
+        <div id="ph-project" style="color:rgba(250,247,242,0.5);font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">Project Memento</div>
+        <h2 id="ph-name">Hello!</h2>
+        <p id="ph-sub">What would you like to do today?</p>
+      </div>
+    </div>
+    <button onclick="openDashboard()" title="Caregiver Access" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:40px;height:40px;font-size:1.1rem;cursor:pointer;">🔒</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-assess-btn" onclick="switchTab('assess')"><span id="t-tab-assess">🧠 Assessment</span></button>
+    <button class="tab-btn" id="tab-exercise-btn" onclick="switchTab('exercise')"><span id="t-tab-exercise">🧘 Exercises</span></button>
+  </div>
+
+  <!-- ASSESSMENT TAB -->
+  <div class="tab-content active" id="tab-assess">
+    <div class="last-assessment-banner" id="last-assess-banner" style="display:none;">
+      <div class="lab-left">
+        <p>Last assessment</p>
+        <h4 id="last-assess-text">—</h4>
+      </div>
+      <div class="last-score-pill" id="last-score-pill">—</div>
+    </div>
+    <p id="t-assess-sub" style="color:var(--muted);font-size:0.9rem;margin-bottom:20px;">Complete all four games to generate a cognitive assessment report.</p>
+    <div class="games-grid">
+      <div class="game-card" id="gc-memory" onclick="launchGame('memory')">
+        <div class="game-card-icon" style="background:rgba(122,158,135,0.15)">🃏</div>
+        <h3 id="t-gc-mem-name">Memory Match</h3>
+        <p id="t-gc-mem-desc">Flip cards and find matching pairs as quickly as you can.</p>
+        <div class="duration" id="t-gc-mem-dur">⏱ ~3 minutes</div>
+      </div>
+      <div class="game-card" id="gc-pattern" onclick="launchGame('pattern')">
+        <div class="game-card-icon" style="background:rgba(30,45,64,0.1)">🔷</div>
+        <h3 id="t-gc-pat-name">Pattern Recognition</h3>
+        <p id="t-gc-pat-desc">Spot which pattern comes next in a sequence.</p>
+        <div class="duration" id="t-gc-pat-dur">⏱ ~3 minutes</div>
+      </div>
+      <div class="game-card" id="gc-number" onclick="launchGame('number')">
+        <div class="game-card-icon" style="background:rgba(212,168,83,0.15)">🔢</div>
+        <h3 id="t-gc-num-name">Number Memory</h3>
+        <p id="t-gc-num-desc">See a number sequence, then type it back in order.</p>
+        <div class="duration" id="t-gc-num-dur">⏱ ~2 minutes</div>
+      </div>
+      <div class="game-card" id="gc-reaction" onclick="launchGame('reaction')">
+        <div class="game-card-icon" style="background:rgba(196,113,79,0.12)">⚡</div>
+        <h3 id="t-gc-react-name">Reaction Time</h3>
+        <p id="t-gc-react-desc">Tap the button as fast as you can when it lights up.</p>
+        <div class="duration" id="t-gc-react-dur">⏱ ~2 minutes</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="hub-progress" style="width:0%"></div></div>
+      <button class="btn-primary" id="finish-btn" onclick="showResults()" style="display:none;margin-top:16px;"><span id="t-hub-finish">View Results →</span></button>
+    </div>
+  </div>
+
+  <!-- EXERCISES TAB -->
+  <div class="tab-content" id="tab-exercise">
+    <p id="t-exercise-sub" style="color:var(--muted);font-size:0.9rem;margin-bottom:20px;">Gentle activities to help you relax and feel good.</p>
+    <div class="exercise-card" onclick="startBreathing()">
+      <div class="exercise-card-icon" style="background:rgba(122,158,135,0.12);">🧘</div>
+      <div>
+        <h3 id="t-ex-breathing">Breathing Exercise</h3>
+        <p id="t-ex-breathing-desc">A calming 4-4-4 box breathing session to reduce stress and clear your mind.</p>
+        <div class="ex-dur">⏱ ~5 minutes</div>
+      </div>
+    </div>
+    <div class="exercise-card" style="opacity:0.5;cursor:default;">
+      <div class="exercise-card-icon" style="background:rgba(212,168,83,0.12);">🎵</div>
+      <div>
+        <h3 id="t-ex-music">Gentle Music</h3>
+        <p id="t-ex-music-desc">Coming soon — calming music to accompany your session.</p>
+        <div class="ex-dur" data-t="ex-coming-soon">Coming soon</div>
+      </div>
+    </div>
+    <div class="exercise-card" style="opacity:0.5;cursor:default;">
+      <div class="exercise-card-icon" style="background:rgba(196,113,79,0.12);">✋</div>
+      <div>
+        <h3 id="t-ex-hand">Hand Exercises</h3>
+        <p id="t-ex-hand-desc">Coming soon — simple guided hand and finger movements.</p>
+        <div class="ex-dur" data-t="ex-coming-soon">Coming soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BREATHING SCREEN ===== -->
+<section class="screen" id="breathing-screen">
+  <div class="breathing-inner">
+    <button onclick="stopBreathing()" style="display:block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:100px;padding:8px 20px;color:rgba(250,247,242,0.6);font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;margin-bottom:32px;">← Back</button>
+    <h2 id="t-breath-title">Box Breathing</h2>
+    <p class="b-sub" id="t-breath-sub">Breathe in sync with the circle. This helps calm your mind and body.</p>
+    <div class="breath-circle-wrap" id="breath-circle-wrap">
+      <div class="breath-ring" id="breath-ring"></div>
+      <div class="breath-dot" id="breath-dot">🌬️</div>
+    </div>
+    <div class="breath-label" id="breath-label">Ready</div>
+    <div class="breath-timer" id="breath-timer">Press start when ready</div>
+    <div class="breath-rounds" id="breath-rounds"></div>
+    <button class="btn-primary" id="breath-start-btn" onclick="startBreathingExercise()" style="background:linear-gradient(135deg,var(--sage),var(--sage-dark));">Begin →</button>
+  </div>
+</section>
+</body>
+</html>

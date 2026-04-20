@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project Memento — Cognitive Assessment & Medication</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --cream: #faf7f2;
+    --warm: #f0ebe0;
+    --sage: #7a9e87;
+    --sage-dark: #4a7a5c;
+    --terracotta: #c4714f;
+    --navy: #1e2d40;
+    --navy-light: #2e4057;
+    --gold: #d4a853;
+    --text: #2a2015;
+    --muted: #7a7060;
+    --card: #ffffff;
+    --border: #e0d9cc;
+    --success: #5a9e6f;
+    --danger: #c44f3e;
+    --warning: #d4a853;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display:none; min-height:100vh; }
+  .screen.active { display:flex; flex-direction:column; }
+
+  /* ===== WELCOME ===== */
+  #welcome {
+    background: var(--navy);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  #welcome::before {
+    content:'';
+    position:absolute; top:-200px; right:-200px;
+    width:600px; height:600px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(122,158,135,0.15) 0%, transparent 70%);
+  }
+  #welcome::after {
+    content:'';
+    position:absolute; bottom:-150px; left:-150px;
+    width:400px; height:400px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(196,113,79,0.1) 0%, transparent 70%);
+  }
+  .welcome-inner { text-align:center; max-width:560px; position:relative; z-index:1; }
+  .brain-icon {
+    width:80px; height:80px;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    border-radius:24px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px;
+    margin: 0 auto 32px;
+    box-shadow: 0 20px 60px rgba(122,158,135,0.3);
+  }
+  .welcome-inner h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .welcome-inner h1 em { color: var(--sage); font-style:normal; }
+  .welcome-inner p {
+    color: rgba(250,247,242,0.65);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+  .welcome-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+    justify-content: center;
+  }
+  .wcard {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .wcard-icon { font-size: 14px; }
+  .wcard h3 { color: var(--cream); font-size: 0.8rem; font-weight: 600; }
+  .wcard p { display: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    color: white;
+    border: none;
+    padding: 20px 64px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 8px 30px rgba(74,122,92,0.35);
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(74,122,92,0.45); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--sage);
+    border: 2px solid var(--sage);
+    padding: 13px 32px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover { background: var(--sage); color: white; }
+
+  /* ===== MEDICATION STYLES ===== */
+  .med-container { flex:1; overflow-y:auto; padding:24px 20px 80px; }
+  .med-header {
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    color: white;
+    padding: 32px 20px;
+    border-radius: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(74,122,92,0.2);
+  }
+  .med-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  .med-header p { opacity: 0.9; }
+
+  .med-schedule {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .med-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border: 2px solid var(--border);
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .med-card:hover {
+    border-color: var(--sage);
+    box-shadow: 0 8px 24px rgba(122,158,135,0.15);
+  }
+
+  .med-card.completed {
+    background: linear-gradient(135deg, rgba(90,158,111,0.08), rgba(122,158,135,0.05));
+    border-color: var(--success);
+  }
+
+  .med-card.missed {
+    background: linear-gradient(135deg, rgba(196,79,62,0.08), rgba(196,79,62,0.05));
+    border-color: var(--danger);
+  }
+
+  .med-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .med-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .med-dose {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .med-time {
+    background: var(--warm);
+    color: var(--navy);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .med-details {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .med-detail-item {
+    display: flex;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .med-detail-item strong { color: var(--navy); }
+
+  .med-action {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .med-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .med-btn-take {
+    background: var(--sage);
+    color: white;
+  }
+
+  .med-btn-take:hover {
+    background: var(--sage-dark);
+    box-shadow: 0 4px 12px rgba(122,158,135,0.3);
+  }
+
+  .med-btn-skip {
+    background: var(--border);
+    color: var(--muted);
+  }
+
+  .med-btn-skip:hover { background: var(--warm); }
+
+  .med-checkmark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--success);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    margin-left: 8px;
+  }
+
+  .med-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .med-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .med-stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--sage);
+    font-weight: 700;
+  }
+
+  .med-stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--navy);
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--sage);
+  }
+
+  .time-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .time-input-group {
+    display: flex;
+    gap: 4px;
+  }
+
+  .time-input-group input {
+    flex: 1;
+    padding: 10px;
+  }
+
+  .time-input-group button {
+    padding: 10px 12px;
+    background: var(--border);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .time-input-group button:hover {
+    background: var(--sage);
+    color: white;
+    border-color: var(--sage);
+  }
+
+  .success-message {
+    background: linear-gradient(135deg, var(--success), #4a8e5e);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .success-message.show { display: block; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Caregiver Dashboard */
+  .carer-med-section {
+    margin-bottom: 32px;
+  }
+
+  .carer-med-section h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+
+  .med-alert {
+    background: linear-gradient(135deg, rgba(196,79,62,0.1), rgba(212,113,79,0.08));
+    border: 2px solid var(--danger);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .med-alert-content h4 {
+    color: var(--danger);
+    margin-bottom: 4px;
+  }
+
+  .med-alert-content p {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .med-log-entry {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .med-log-time {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .med-log-status {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+
+  .med-log-status.taken {
+    background: rgba(90,158,111,0.2);
+    color: var(--success);
+  }
+
+  .med-log-status.missed {
+    background: rgba(196,79,62,0.2);
+    color: var(--danger);
+  }
+
+  .med-log-status.skipped {
+    background: rgba(212,168,83,0.2);
+    color: var(--warning);
+  }
+
+  .med-item-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .med-item-actions button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .edit-btn {
+    background: var(--warm);
+    color: var(--navy);
+  }
+
+  .edit-btn:hover {
+    background: var(--gold);
+  }
+
+  .delete-btn {
+    background: rgba(196,79,62,0.15);
+    color: var(--danger);
+  }
+
+  .delete-btn:hover {
+    background: var(--danger);
+    color: white;
+  }
+
+  /* Caregiver Dashboard Styles */
+  .carer-dash-header {
+    background: var(--navy);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .carer-dash-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+  }
+
+  .carer-dash-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .med-header h2 { font-size: 1.6rem; }
+    .modal-content { padding: 24px; }
+    .med-details { flex-direction: column; }
+    .time-inputs { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== WELCOME SCREEN ===== -->
+<section class="screen active" id="welcome">
+  <div class="welcome-inner">
+    <div class="brain-icon">🧠</div>
+    <h1>Project <em>Memento</em></h1>
+    <p>Cognitive assessment and medication management in one place</p>
+    <div class="welcome-cards">
+      <div class="wcard">
+        <span class="wcard-icon">🎮</span>
+        <h3>4 Assessments</h3>
+      </div>
+      <div class="wcard">
+        <span class="wcard-icon">💊</span>
+        <h3>Medication Tracking</h3>
+      </div>
+      <div class="wcard">
+        <span class="wcard-icon">🧘</span>
+        <h3>Wellbeing</h3>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="showScreen('patient-home')">Get Started →</button>
+  </div>
+</section>
+
+<!-- ===== PATIENT HOME WITH MEDICATIONS ===== -->
+<section class="screen" id="patient-home">
+  <div class="med-container">
+    <div class="med-header">
+      <h2>💊 Today's Medications</h2>
+      <p>Take your medications on time to stay healthy and well.</p>
+    </div>
+
+    <div class="success-message" id="success-msg">
+      ✓ Great! You've taken your medication. Keep up the good work!
+    </div>
+
+    <div class="med-stats">
+      <div class="med-stat-card">
+        <div class="med-stat-value" id="stat-taken">0</div>
+        <div class="med-stat-label">Taken</div>
+      </div>
+      <div class="med-stat-card">
+        <div class="med-stat-value" id="stat-remaining">3</div>
+        <div class="med-stat-label">Remaining</div>
+      </div>
+      <div class="med-stat-card">
+        <div class="med-stat-value" id="stat-rate">100%</div>
+        <div class="med-stat-label">On Track</div>
+      </div>
+    </div>
+
+    <div class="med-schedule" id="med-schedule"></div>
+
+    <div style="text-align: center; padding: 24px 0;">
+      <button class="btn-secondary" onclick="showScreen('welcome')" style="margin-right: 12px;">← Back</button>
+      <button class="btn-primary" onclick="showScreen('caregiver-med-dashboard')">Caregiver View →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MEDICATION CONFIRMATION MODAL ===== -->
+<div class="modal" id="med-modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeMedModal()">✕</button>
+    <h3 class="modal-title" id="modal-med-name">Medication Name</h3>
+    <p id="modal-med-info" style="color: var(--muted); margin-bottom: 20px;"></p>
+    
+    <div style="background: var(--warm); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Scheduled for:</p>
+      <p style="font-size: 1.2rem; font-weight: 600; color: var(--navy);" id="modal-med-time">—</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem;">
+        <input type="checkbox" id="modal-confirm-taken" style="width: 20px; height: 20px; cursor: pointer;"/>
+        <span>I have taken this medication</span>
+      </label>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-primary" onclick="confirmMedication()" style="flex: 1;">Confirm ✓</button>
+      <button class="btn-secondary" onclick="closeMedModal()" style="flex: 1;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD/EDIT MEDICATION MODAL ===== -->
+<div class="modal" id="add-med-modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeAddMedModal()">✕</button>
+    <h3 class="modal-title" id="add-med-title">Add Medication</h3>
+
+    <form onsubmit="saveMedication(event)">
+      <div class="form-group">
+        <label>Medication Name *</label>
+        <input type="text" id="med-name-input" placeholder="e.g., Aspirin, Lisinopril" required/>
+      </div>
+
+      <div class="form-group">
+        <label>Dosage *</label>
+        <input type="text" id="med-dose-input" placeholder="e.g., 100mg, 1 tablet" required/>
+      </div>
+
+      <div class="form-group">
+        <label>What It's Used For</label>
+        <input type="text" id="med-reason-input" placeholder="e.g., Blood pressure, Heart health"/>
+      </div>
+
+      <div class="form-group">
+        <label>Scheduled Times</label>
+        <div class="time-inputs" id="med-times-container">
+          <input type="time" class="med-time-input" value="09:00"/>
+        </div>
+        <button type="button" class="btn-secondary" onclick="addTimeSlot()" style="width: 100%; margin-top: 8px; padding: 10px;">+ Add Another Time</button>
+      </div>
+
+      <div class="form-group">
+        <label>Remarks / Notes</label>
+        <textarea id="med-notes-input" placeholder="e.g., Take with food, avoid dairy" rows="3"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn-primary" style="flex: 1;" id="save-med-btn">Save Medication</button>
+        <button type="button" class="btn-secondary" onclick="closeAddMedModal()" style="flex: 1;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== CAREGIVER MEDICATION DASHBOARD ===== -->
+<section class="screen" id="caregiver-med-dashboard">
+  <div class="carer-dash-header">
+    <h2>💊 Medication Monitor</h2>
+    <button onclick="showScreen('patient-home')" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; color: white; font-size: 1rem;">←</button>
+  </div>
+
+  <div class="carer-dash-content">
+    <!-- Alerts Section -->
+    <div class="carer-med-section">
+      <h3>⚠️ Alerts</h3>
+      <div id="carer-alerts-container">
+        <p style="color: var(--muted); font-style: italic;">No alerts — patient is on track!</p>
+      </div>
+    </div>
+
+    <!-- Today's Overview -->
+    <div class="carer-med-section">
+      <h3>Today's Status</h3>
+      <div class="med-stats">
+        <div class="med-stat-card">
+          <div class="med-stat-value" id="carer-stat-taken">0</div>
+          <div class="med-stat-label">Taken</div>
+        </div>
+        <div class="med-stat-card">
+          <div class="med-stat-value" id="carer-stat-missed">0</div>
+          <div class="med-stat-label">Missed</div>
+        </div>
+        <div class="med-stat-card">
+          <div class="med-stat-value" id="carer-stat-rate">0%</div>
+          <div class="med-stat-label">On Track</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Medications -->
+    <div class="carer-med-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3>Patient's Medications</h3>
+        <button class="btn-secondary" onclick="showMedModal('add')" style="padding: 8px 16px; font-size: 0.85rem;">+ Add Medication</button>
+      </div>
+      <div id="carer-med-list"></div>
+    </div>
+
+    <!-- History -->
+    <div class="carer-med-section">
+      <h3>Recent History (7 Days)</h3>
+      <div id="carer-med-history"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ===== MEDICATION DATA =====
+let medications = JSON.parse(localStorage.getItem('medications')) || [
+  {
+    id: 1,
+    name: 'Aspirin',
+    dose: '100mg',
+    reason: 'Blood thinner',
+    times: ['09:00', '18:00'],
+    notes: 'Take with water',
+    created: new Date().toISOString().split('T')[0]
+  },
+  {
+    id: 2,
+    name: 'Lisinopril',
+    dose: '10mg',
+    reason: 'Blood pressure',
+    times: ['08:00'],
+    notes: 'Take in morning',
+    created: new Date().toISOString().split('T')[0]
+  },
+  {
+    id: 3,
+    name: 'Vitamin D3',
+    dose: '1000IU',
+    reason: 'Bone health',
+    times: ['12:00'],
+    notes: 'Take with meals',
+    created: new Date().toISOString().split('T')[0]
+  }
+];
+
+let medicationLog = JSON.parse(localStorage.getItem('medicationLog')) || [];
+let currentEditingMedId = null;
+
+// ===== RENDER MEDICATION SCHEDULE (PATIENT VIEW) =====
+function renderMedicationSchedule() {
+  const container = document.getElementById('med-schedule');
+  const today = new Date().toISOString().split('T')[0];
+
+  let html = '';
+  let taken = 0, remaining = 0;
+
+  medications.forEach(med => {
+    med.times.forEach((time, idx) => {
+      const logKey = `${med.id}-${time}`;
+      const logEntry = medicationLog.find(e => e.key === logKey && e.date === today);
+      const isTaken = logEntry && logEntry.status === 'taken';
+      const isMissed = logEntry && logEntry.status === 'missed';
+
+      if (isTaken) taken++;
+      if (!isTaken && !isMissed) remaining++;
+
+      const cardClass = isTaken ? 'completed' : (isMissed ? 'missed' : '');
+      const checkmark = isTaken ? '<span class="med-checkmark">✓</span>' : '';
+
+      html += `
+        <div class="med-card ${cardClass}" onclick="showMedModal('${med.id}-${time}')">
+          <div class="med-card-header">
+            <div>
+              <div class="med-name">${med.name}${checkmark}</div>
+              <div class="med-dose">${med.dose}</div>
+            </div>
+            <div class="med-time">${time}</div>
+          </div>
+          <div class="med-details">
+            <div class="med-detail-item">💊 <strong>${med.reason}</strong></div>
+            <div class="med-detail-item">📝 ${med.notes}</div>
+          </div>
+          ${!isTaken ? `<div class="med-action"><button class="med-btn med-btn-take" onclick="event.stopPropagation(); markTaken('${med.id}-${time}')">✓ Take Now</button><button class="med-btn med-btn-skip" onclick="event.stopPropagation(); markSkipped('${med.id}-${time}')">Skip</button></div>` : ''}
+        </div>
+      `;
+    });
+  });
+
+  container.innerHTML = html;
+
+  // Update stats
+  const totalDoses = medications.reduce((sum, m) => sum + m.times.length, 0);
+  const rate = totalDoses > 0 ? Math.round((taken / totalDoses) * 100) : 100;
+
+  document.getElementById('stat-taken').textContent = taken;
+  document.getElementById('stat-remaining').textContent = remaining;
+  document.getElementById('stat-rate').textContent = rate + '%';
+}
+
+// ===== RENDER CAREGIVER DASHBOARD =====
+function renderCaregiverDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Calculate stats
+  let taken = 0, missed = 0;
+  medications.forEach(med => {
+    med.times.forEach(time => {
+      const logKey = `${med.id}-${time}`;
+      const logEntry = medicationLog.find(e => e.key === logKey && e.date === today);
+      if (logEntry && logEntry.status === 'taken') taken++;
+      else if (logEntry && logEntry.status === 'missed') missed++;
+    });
+  });
+
+  const total = medications.reduce((sum, m) => sum + m.times.length, 0);
+  const rate = total > 0 ? Math.round((taken / total) * 100) : 0;
+
+  document.getElementById('carer-stat-taken').textContent = taken;
+  document.getElementById('carer-stat-missed').textContent = missed;
+  document.getElementById('carer-stat-rate').textContent = rate + '%';
+
+  // Render alerts
+  const alertsContainer = document.getElementById('carer-alerts-container');
+  let alerts = '';
+
+  medications.forEach(med => {
+    med.times.forEach(time => {
+      const logKey = `${med.id}-${time}`;
+      const logEntry = medicationLog.find(e => e.key === logKey && e.date === today);
+      
+      const [hour, min] = time.split(':');
+      const medTime = new Date();
+      medTime.setHours(parseInt(hour), parseInt(min), 0);
+      const now = new Date();
+
+      if (!logEntry && now > medTime) {
+        alerts += `
+          <div class="med-alert">
+            <div style="display: flex; gap: 12px;">
+              <span style="font-size: 1.4rem;">⚠️</span>
+              <div class="med-alert-content">
+                <h4>${med.name} — ${time}</h4>
+                <p>Missed dose. Patient may need reminder or assistance.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+  });
+
+  alertsContainer.innerHTML = alerts || '<p style="color: var(--muted); font-style: italic;">No alerts — patient is on track!</p>';
+
+  // Render medications list
+  const medListContainer = document.getElementById('carer-med-list');
+  let medList = '';
+
+  medications.forEach(med => {
+    medList += `
+      <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <h4 style="color: var(--navy); font-weight: 600; margin-bottom: 4px;">${med.name}</h4>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">${med.dose} • ${med.reason}</p>
+            <p style="font-size: 0.8rem; color: var(--muted);">📍 Times: ${med.times.join(', ')}</p>
+            <p style="font-size: 0.8rem; color: var(--muted); font-style: italic;">📝 ${med.notes}</p>
+          </div>
+          <div class="med-item-actions">
+            <button class="edit-btn" onclick="editMedication(${med.id})">✎ Edit</button>
+            <button class="delete-btn" onclick="deleteMedication(${med.id})">🗑 Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  medListContainer.innerHTML = medList;
+
+  // Render history
+  const historyContainer = document.getElementById('carer-med-history');
+  const recentEntries = medicationLog.slice(-10).reverse();
+  let history = '';
+
+  if (recentEntries.length === 0) {
+    history = '<p style="color: var(--muted); font-style: italic;">No history yet</p>';
+  } else {
+    recentEntries.forEach(entry => {
+      const med = medications.find(m => m.id == entry.medId);
+      if (med) {
+        history += `
+          <div class="med-log-entry">
+            <div>
+              <p style="font-weight: 600; color: var(--navy);">${med.name}</p>
+              <p style="font-size: 0.8rem; color: var(--muted);">${entry.date} at ${entry.time}</p>
+            </div>
+            <span class="med-log-status ${entry.status}">${entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}</span>
+          </div>
+        `;
+      }
+    });
+  }
+
+  historyContainer.innerHTML = history;
+}
+
+// ===== MARK MEDICATION AS TAKEN =====
+function markTaken(key) {
+  const [medId, time] = key.split('-');
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check if already logged
+  const existing = medicationLog.find(e => e.key === key && e.date === today);
+  if (existing) {
+    existing.status = 'taken';
+    existing.timestamp = new Date().toISOString();
+  } else {
+    medicationLog.push({
+      key: key,
+      medId: parseInt(medId),
+      date: today,
+      time: time,
+      timestamp: new Date().toISOString(),
+      status: 'taken'
+    });
+  }
+
+  localStorage.setItem('medicationLog', JSON.stringify(medicationLog));
+
+  const msg = document.getElementById('success-msg');
+  msg.classList.add('show');
+  setTimeout(() => msg.classList.remove('show'), 3000);
+
+  renderMedicationSchedule();
+}
+
+// ===== MARK MEDICATION AS SKIPPED =====
+function markSkipped(key) {
+  const [medId, time] = key.split('-');
+  const today = new Date().toISOString().split('T')[0];
+
+  const existing = medicationLog.find(e => e.key === key && e.date === today);
+  if (existing) {
+    existing.status = 'skipped';
+  } else {
+    medicationLog.push({
+      key: key,
+      medId: parseInt(medId),
+      date: today,
+      time: time,
+      timestamp: new Date().toISOString(),
+      status: 'skipped'
+    });
+  }
+
+  localStorage.setItem('medicationLog', JSON.stringify(medicationLog));
+  renderMedicationSchedule();
+}
+
+// ===== MODAL FUNCTIONS =====
+function showMedModal(action) {
+  if (action === 'add') {
+    currentEditingMedId = null;
+    document.getElementById('add-med-title').textContent = 'Add Medication';
+    document.getElementById('med-name-input').value = '';
+    document.getElementById('med-dose-input').value = '';
+    document.getElementById('med-reason-input').value = '';
+    document.getElementById('med-notes-input').value = '';
+    document.getElementById('med-times-container').innerHTML = '<input type="time" class="med-time-input" value="09:00"/>';
+    document.getElementById('save-med-btn').textContent = 'Save Medication';
+    document.getElementById('add-med-modal').classList.add('active');
+  } else {
+    const [medId, time] = action.split('-');
+    const med = medications.find(m => m.id == medId);
+    
+    document.getElementById('modal-med-name').textContent = med.name;
+    document.getElementById('modal-med-info').textContent = `${med.dose} • ${med.reason}`;
+    document.getElementById('modal-med-time').textContent = time;
+    document.getElementById('modal-confirm-taken').checked = false;
+    document.getElementById('med-modal').classList.add('active');
+  }
+}
+
+function closeMedModal() {
+  document.getElementById('med-modal').classList.remove('active');
+}
+
+function closeAddMedModal() {
+  document.getElementById('add-med-modal').classList.remove('active');
+  currentEditingMedId = null;
+}
+
+function confirmMedication() {
+  if (!document.getElementById('modal-confirm-taken').checked) {
+    alert('Please confirm you have taken the medication');
+    return;
+  }
+  
+  const medName = document.getElementById('modal-med-name').textContent;
+  const time = document.getElementById('modal-med-time').textContent;
+  const med = medications.find(m => m.name === medName);
+  
+  if (med) {
+    markTaken(`${med.id}-${time}`);
+    closeMedModal();
+  }
+}
+
+function addTimeSlot() {
+  const container = document.getElementById('med-times-container');
+  const input = document.createElement('input');
+  input.type = 'time';
+  input.className = 'med-time-input';
+  input.value = '12:00';
+  container.appendChild(input);
+}
+
+function editMedication(medId) {
+  const med = medications.find(m => m.id === medId);
+  if (!med) return;
+
+  currentEditingMedId = medId;
+  document.getElementById('add-med-title').textContent = 'Edit Medication';
+  document.getElementById('med-name-input').value = med.name;
+  document.getElementById('med-dose-input').value = med.dose;
+  document.getElementById('med-reason-input').value = med.reason;
+  document.getElementById('med-notes-input').value = med.notes;
+  
+  // Set up times
+  const timesContainer = document.getElementById('med-times-container');
+  timesContainer.innerHTML = '';
+  med.times.forEach(time => {
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.className = 'med-time-input';
+    input.value = time;
+    timesContainer.appendChild(input);
+  });
+
+  document.getElementById('save-med-btn').textContent = 'Update Medication';
+  document.getElementById('add-med-modal').classList.add('active');
+}
+
+function saveMedication(e) {
+  e.preventDefault();
+
+  const name = document.getElementById('med-name-input').value;
+  const dose = document.getElementById('med-dose-input').value;
+  const reason = document.getElementById('med-reason-input').value;
+  const notes = document.getElementById('med-notes-input').value;
+
+  const timeInputs = document.querySelectorAll('.med-time-input');
+  const times = Array.from(timeInputs).map(input => input.value).filter(t => t);
+
+  if (!name || !dose || times.length === 0) {
+    alert('Please fill in medication name, dosage, and at least one time');
+    return;
+  }
+
+  if (currentEditingMedId !== null) {
+    // Update existing
+    const med = medications.find(m => m.id === currentEditingMedId);
+    if (med) {
+      med.name = name;
+      med.dose = dose;
+      med.reason = reason;
+      med.times = times;
+      med.notes = notes;
+    }
+  } else {
+    // Add new
+    const newMed = {
+      id: Math.max(...medications.map(m => m.id), 0) + 1,
+      name,
+      dose,
+      reason,
+      times,
+      notes,
+      created: new Date().toISOString().split('T')[0]
+    };
+    medications.push(newMed);
+  }
+
+  localStorage.setItem('medications', JSON.stringify(medications));
+
+  closeAddMedModal();
+  renderMedicationSchedule();
+  if (document.getElementById('caregiver-med-dashboard').classList.contains('active')) {
+    renderCaregiverDashboard();
+  }
+}
+
+function deleteMedication(medId) {
+  if (confirm('Are you sure you want to delete this medication?')) {
+    medications = medications.filter(m => m.id !== medId);
+    localStorage.setItem('medications', JSON.stringify(medications));
+    renderMedicationSchedule();
+    renderCaregiverDashboard();
+  }
+}
+
+// ===== SCREEN NAVIGATION =====
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+
+  if (screenId === 'caregiver-med-dashboard') {
+    renderCaregiverDashboard();
+  } else if (screenId === 'patient-home') {
+    renderMedicationSchedule();
+  }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderMedicationSchedule();
+});
+</script>
+
+</body>
+</html>
